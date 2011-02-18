@@ -71,23 +71,58 @@ $router = new Router_Tree;
 
 $tree = new Tree_Array;
 
-$tree
-	->addTopNode('Blogg', 'blog')
-		->addChild('blog', 'Admin', 'fiska')
-		->addChild('blog', 'Kategori', '*')
-		->addChild('blog/*', 'Titel', '*')
-	
-	->addTopNode('About', 'about')
-		->addChild('about', 'Secret', 'hemligt')
-		->addChild('about', 'Fiskmås', '*');
+// Name, pattern, parent_path
+// Name, pattern
 
-print_r($tree->toArray());
+$tree
+	->addParent('Admin', 'secreturl', '/')
+		->addChild('controller', '*')
+
+	->addParent('Blogg', 'blog', '/')
+		->addParent('kategori', '*', '/blog')
+			->addChild('title', '*')
+	
+	->addParent('About', 'about', '/')
+		->addChild('mail', 'mail')
+		->addChild('namn', '*');
+
+/*
+$tree ->addNodes(function () {
+	$this->addNode('Blogg', 'blog', function() {
+		$this->addNode('Kategori', '*', function() {
+			$this->addNode('Titel', '*');
+		});
+		$this->addNode('About', '*', function() {
+			$this->addNode('Secret');
+			$this->addNode('Fiskmås');
+		});
+	})
+});
+*/
 
 $router->addRoutes($tree->toArray());
 
-$trace = $router->findRoute('/about/hemligt/fdsa');
+if(isset($_GET['route'])) {
+	$route = $_GET['route'];
+	$trace = $router->findRoute($route);
+	//print_r($trace);
+}
+/*$tree = array(
+	'Blogg', 'blog', array(
+		'Kategori', '*', array(
+			'titel', '*'
+		)
+	),
 
+	'About', 'about', array(
+		'Mail', 'mail',
+		'namn', '*'
+	),
 
-print_r($trace);
+	'Admin', 'admin', array(
+		'Controller', '*'
+	)
+);*/
+print_r($tree->toArray());
 echo '</pre>';
 

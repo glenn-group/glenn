@@ -4,45 +4,61 @@ namespace Glenn\Routing;
 require 'tree.php';
 require 'tree_node.php';
 
-class Tree_Array implements Tree {
+class Tree_Array {
 
 	private $tree = array();
+	private $pointer;
 
-	public function __constuct() {
-		
+	public function __constuct($arrayRef) {
+		$this->tree = $arrayRef;
+		$this->pointer = &$this->tree;
 	}
 
-	public function addTopNode($name, $pattern) {
-		$this->tree[$pattern]['name'] = $name;
-		return $this;
-	}
+	public function addParent($name, $pattern, $path, $show = false) {
 
-	public function addChild($parent, $name, $pattern) {
-		$path = $this->pathToArray($parent);
+		$path = $this->pathToArray($path);
+		if ( ! $path) {
+			$this->pointer = &$this->tree;
+		} else {
+			// Point to first level node
+			$arrayRef = &$this->tree[$path[0]];
 
-		// Point to first level node
-		$arrayRef = &$this->tree[$path[0]];
-
-		// Point to correct node
-		$levels = count($path);
-		for($i = 1; $i < $levels; $i++) {
-			$arrayRef = &$arrayRef['children'][$path[$i]];
+			// Point to correct node
+			$levels = count($path);
+			for($i = 1; $i < $levels; $i++) {
+				$arrayRef = &$arrayRef['children'][$path[$i]];
+			}
 		}
 
-		// Add child
-		$arrayRef['children'][$pattern]['name'] = $name;
+		// If pointer is not root
+		if($this->pointer != $this->tree) {
+			$this->pointer['children'][$pattern]['name'] = $name;
+			$this->pointer = &$this->pointer['children'][$pattern];
+		} else { // Pointer is node
+			$this->pointer[$pattern]['name'] = $name;
+			$this->pointer = &$this->pointer[$pattern];
+		}
 
 		return $this;
 	}
 
-	
+	public function addChild($name, $pattern) {
+		// Add child
+		$this->pointer['children'][$pattern]['name'] = $name;
+		return $this;
+	}	
 
 	public function removeChild($path) {
 		throw new Exception('Unsupported operation');
 	}
 
 	public function pathToArray($path) {
-		return explode('/', $path);
+		$path = mb_substr($path, 1);
+		$path_array = explode('/', $path);
+		if($path_array[0] == '') {
+			return false;
+		}
+		return $path_array;
 	}
 
 	public function toArray() {
