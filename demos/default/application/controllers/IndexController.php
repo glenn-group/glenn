@@ -1,6 +1,4 @@
 <?php
-namespace Application;
-
 use Glenn\Response;
 
 class IndexController
@@ -10,7 +8,8 @@ class IndexController
         return new Response("Index page");
     }
     
-    public function aboutAction()
+    public function listAction()
+    
     {
         return new Response("About page");
     }

@@ -1,11 +1,9 @@
 <?php
-namespace Application;
-
 use Glenn\Dispatchable,
     Glenn\Request,
     Glenn\Response;
 
-class ScriptController implements Dispatchable
+class ScriptController implements Dispatcher
 {
     /*
      * @return Response

@@ -1,21 +1,40 @@
 <?php
 namespace Glenn;
 
-use Application\IndexController;
-
-class FrontController implements Dispatchable
+class FrontController implements Dispatcher
 {
+    private $router;
+    
+    public function __construct() 
+    {
+        $this->router = new Router();
+    }
+    
 	public function dispatch(Request $request)
 	{
-		switch ($request->uri) {
-		    case "/":
-		        $controller = new IndexController();
-		        return $controller->indexAction();
-		    case "/about":
-		        $controller = new IndexController();
-		        return $controller->aboutAction();
-		    default:
-		        return new Response("Page not found", 404);
-		}
+        $result = $this->router->route($request);
+        
+        $class = ucfirst($result['controller']) . 'Controller';
+        $method = lcfirst($result['action']) . 'Action';
+        
+        //if ($class instanceof Controller) {
+            $controller = new $class;
+        //} else {
+        //    throw new Exception("");
+        //}
+        
+        //$controller->setRequest($request);
+        
+        $controller->$method();
+        
+        // perhaps controller could dispatch action?
+        //$controller->dispatch($modifiedRequest);
+        
+        return new Response("Page not found", 404);
 	}
+    
+    public function getRouter()
+    {
+        return $this->router;
+    }
 }

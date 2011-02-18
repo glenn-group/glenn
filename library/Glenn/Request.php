@@ -20,4 +20,9 @@ class Request
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
     }
+    
+    public function __toString() {
+        
+    }
 }
+
