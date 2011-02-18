@@ -28,12 +28,16 @@ class Tree_Array {
 			for($i = 1; $i < $levels; $i++) {
 				$arrayRef = &$arrayRef['children'][$path[$i]];
 			}
+
+			//Update pointer
+			$this->pointer = &$arrayRef;
 		}
 
 		// If pointer is not root
 		if($this->pointer != $this->tree) {
 			$this->pointer['children'][$pattern]['name'] = $name;
 			$this->pointer = &$this->pointer['children'][$pattern];
+
 		} else { // Pointer is node
 			$this->pointer[$pattern]['name'] = $name;
 			$this->pointer = &$this->pointer[$pattern];
@@ -43,7 +47,6 @@ class Tree_Array {
 	}
 
 	public function addChild($name, $pattern) {
-		// Add child
 		$this->pointer['children'][$pattern]['name'] = $name;
 		return $this;
 	}	
@@ -52,7 +55,7 @@ class Tree_Array {
 		throw new Exception('Unsupported operation');
 	}
 
-	public function pathToArray($path) {
+	private function pathToArray($path) {
 		$path = mb_substr($path, 1);
 		$path_array = explode('/', $path);
 		if($path_array[0] == '') {
