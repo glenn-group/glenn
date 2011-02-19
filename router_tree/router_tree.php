@@ -75,7 +75,9 @@ $tree = new Tree_Array;
 $tree
 	->addParent('Admin', 'secreturl', '/')
 		->addParent('Users', 'secreturl', '/secreturl')
-			->addChild('user', '*')
+			->addChild('add', 'add')
+			->addChild('delete', 'delete')
+			->addChild('edit', 'edit')
 
 	->addParent('Blogg', 'blog', '/')
 		->addParent('kategori', '*', '/blog')
@@ -185,7 +187,7 @@ TreePrinter::traverseTreeWrapper($tree->toArray());
 		background: #888;
 		border: 0;
 		width: 3px;
-		height: 42px;
+		height: 0px;
 		padding: 0;
 		display: block;
 		margin: 0 auto;
@@ -194,7 +196,7 @@ TreePrinter::traverseTreeWrapper($tree->toArray());
 		background: #888;
 		border: 0;
 		width: 3px;
-		height: 10px;
+		height: 42px;
 		padding: 0;
 		display: block;
 		margin: -20px auto 0;

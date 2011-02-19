@@ -66,7 +66,7 @@ class TreePrinter
 			$lines_bottom = '<span class="vertline_down"></span><span class="horzline"></span>';
 		}
 		if ($tree->children == 1) {
-			$lines_bottom = '<span class="vertline_down"></span>';
+			$lines_bottom = '<span class="vertline_down"></span><span class="horzline"></span>';
 		}
 
 		// If has several children
