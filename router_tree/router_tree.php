@@ -246,8 +246,7 @@ TreePrinter::traverseTreeWrapper($tree->toArray());
 <form action="" method="get">
 	<p>
 		<label for="uri">URI</label>
-		<input type="text" id="uri" name="route" value="
-		<?php echo isset($_GET['route']) ? $_GET['route'] : '/'; ?>" />
+		<input type="text" id="uri" name="route" value="<?php echo isset($_GET['route']) ? $_GET['route'] : '/'; ?>" />
 		<input type="submit" value="Test" />
 	</p>
 </form>
