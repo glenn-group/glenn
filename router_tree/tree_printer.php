@@ -16,7 +16,7 @@ class TreePrinter
 	public static $html = '
 		<ul>
 			<li>
-				<div style="display: block;">/</div>
+				<div class="root" style="display: block;">/</div>
 				<span class="vertline_down"></span>
 				<span class="horzline"></span>
 			<ul>
@@ -42,7 +42,7 @@ class TreePrinter
 			if(isset($tree[$children[$i]]['children'])) {
 				self::$stack->push(new aNode($tree, count($tree[$children[$i]]['children']), $tree[$children[$i]]));
 			} else {
-				self::$stack->push(new aNode($tree, count($tree[$children[$i]]['children']), $tree[$children[$i]]));
+				self::$stack->push(new aNode($tree, 0, $tree[$children[$i]]));
 			}
 		}
 
@@ -71,19 +71,19 @@ class TreePrinter
 
 		// If has several children
 		if ($tree->children > 1) {
-			self::$html .= '<li>'.$lines_top.'<div style="display: block;">'.$tree->data['name'] . '</div>'.$lines_bottom.'<ul>';
+			self::$html .= '<li class="'.$tree->data['name'].'">'.$lines_top.'<div style="display: block;">'.$tree->data['name'] . ' (' . $tree->data['pattern'].')</div>'.$lines_bottom.'<ul>';
 			self::$opentags++;
 		}
 
 		// If has one child
 		if ($tree->children == 1) {
-			self::$html .= '<li>'.$lines_top.'<div style="display: block;">'.$tree->data['name'] . '</div>'.$lines_bottom.'<ul>';
+			self::$html .= '<li class="'.$tree->data['name'].'">'.$lines_top.'<div style="display: block;">'.$tree->data['name'] . ' (' . $tree->data['pattern'].')</div>'.$lines_bottom.'<ul>';
 			self::$opentags++;
 		}
 
 		// If has no children
 		if ($tree->children == 0) {
-			self::$html .= '<li>'.$lines_top.'<div>'.$tree->data['name'].'</div></li>';
+			self::$html .= '<li class="'.$tree->data['name'].'">'.$lines_top.'<div>'.$tree->data['name'] . ' (' . $tree->data['pattern'].')</div></li>';
 
 			$elem = null;
 			if( ! self::$stack->isEmpty()) {

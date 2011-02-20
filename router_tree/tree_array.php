@@ -2,7 +2,6 @@
 namespace Glenn\Routing;
 
 require 'tree.php';
-require 'tree_node.php';
 
 class Tree_Array {
 
@@ -36,10 +35,12 @@ class Tree_Array {
 		// If pointer is not root
 		if($this->pointer != $this->tree) {
 			$this->pointer['children'][$pattern]['name'] = $name;
+			$this->pointer['children'][$pattern]['pattern'] = $pattern;
 			$this->pointer = &$this->pointer['children'][$pattern];
 
 		} else { // Pointer is node
 			$this->pointer[$pattern]['name'] = $name;
+			$this->pointer[$pattern]['pattern'] = $pattern;
 			$this->pointer = &$this->pointer[$pattern];
 		}
 
@@ -48,6 +49,7 @@ class Tree_Array {
 
 	public function addChild($name, $pattern) {
 		$this->pointer['children'][$pattern]['name'] = $name;
+		$this->pointer['children'][$pattern]['pattern'] = $pattern;
 		return $this;
 	}	
 
