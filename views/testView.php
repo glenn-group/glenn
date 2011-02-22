@@ -1,2 +1,5 @@
 
-<p> This is my content</p>
+<?php
+ $test="Testet";
+ echo $test;
+?>
