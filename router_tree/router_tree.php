@@ -39,23 +39,37 @@ class Router_Tree implements Router {
 		// Point to first level node
 		if (isset($arrayRef[$uri[0]])) {
 			$arrayRef = &$arrayRef[$uri[0]];
-			$trace[] = $arrayRef['name'];
 		}
 		else if (isset($arrayRef['children']['*'])) {
 			$arrayRef = &$arrayRef['*'];
-			$trace[] = $arrayRef['name'];
+		}
+		$trace['nodes'][] = $arrayRef['name'];
+
+		if (isset($arrayRef['controller']) && !empty($arrayRef['controller'])) {
+			$trace['controller'] = $arrayRef['controller'];
 		}
 
+		if(isset($arrayRef['action']) && !empty($arrayRef['action'])) {
+			$trace['action'] = $arrayRef['action'];
+		}
 		// Point to correct node
 		$levels = count($uri);
 		for ($i = 1; $i < $levels; $i++) {
 			if (isset($arrayRef['children'][$uri[$i]])) {
 				$arrayRef = &$arrayRef['children'][$uri[$i]];
-				$trace[] = $arrayRef['name'];
+				$trace['nodes'][] = $arrayRef['name'];
+
+				if(isset($arrayRef['controller']) && !empty($arrayRef['controller'])) {
+					$trace['controller'] = $arrayRef['controller'];
+				}
+
+				if(isset($arrayRef['action']) && !empty($arrayRef['action'])) {
+					$trace['action'] = $arrayRef['action'];
+				}
 			}
 			else if (isset($arrayRef['children']['*'])) {
 				$arrayRef = &$arrayRef['children']['*'];
-				$trace[] = $arrayRef['name'];
+				$trace['nodes'][] = $arrayRef['name'];
 			}
 		}
 		

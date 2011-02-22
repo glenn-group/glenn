@@ -13,7 +13,16 @@ class Tree_Array {
 		$this->pointer = &$this->tree;
 	}
 
-	public function addParent($name, $pattern, $path, $show = false) {
+	public function addParent($name, $pattern, $path, $config = null) {
+
+		if ($config != null) {
+			$config = explode('#', $config);
+			$controller = $config[0];
+			$action = $config[1];
+		} else {
+			$controller = null;
+			$action = null;
+		}
 
 		$path = $this->pathToArray($path);
 		if ( ! $path) {
@@ -35,11 +44,15 @@ class Tree_Array {
 		// If pointer is not root
 		if($this->pointer != $this->tree) {
 			$this->pointer['children'][$pattern]['name'] = $name;
+			$this->pointer['children'][$pattern]['controller'] = $controller;
+			$this->pointer['children'][$pattern]['action'] = $action;
 			$this->pointer['children'][$pattern]['pattern'] = $pattern;
 			$this->pointer = &$this->pointer['children'][$pattern];
 
 		} else { // Pointer is node
 			$this->pointer[$pattern]['name'] = $name;
+			$this->pointer[$pattern]['controller'] = $controller;
+			$this->pointer[$pattern]['action'] = $action;
 			$this->pointer[$pattern]['pattern'] = $pattern;
 			$this->pointer = &$this->pointer[$pattern];
 		}
@@ -47,9 +60,21 @@ class Tree_Array {
 		return $this;
 	}
 
-	public function addChild($name, $pattern) {
+	public function addChild($name, $pattern, $config = null) {
+
+		if ($config != null) {
+			$config = explode('#', $config);
+			$controller = $config[0];
+			$action = $config[1];
+		} else {
+			$controller = null;
+			$action = null;
+		}
+
 		$this->pointer['children'][$pattern]['name'] = $name;
 		$this->pointer['children'][$pattern]['pattern'] = $pattern;
+		$this->pointer['children'][$pattern]['controller'] = $controller;
+		$this->pointer['children'][$pattern]['action'] = $action;
 		return $this;
 	}	
 
