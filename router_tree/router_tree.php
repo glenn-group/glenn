@@ -27,7 +27,7 @@ class Router_Tree implements Router {
 		}
 
 		// Add / as first char if missing
-		if ($request_uri[0] != '/') {
+		if (isset($request_uri[0]) && $request_uri[0] != '/') {
 			$request_uri = '/'.$request_uri;
 		}
 
@@ -103,7 +103,6 @@ $tree = new Tree_Array;
 
 $tree
 	->addParent('Admin', 'admin', '/')
-
 		->addParent('Users', 'users', '/admin')
 			->addChild('Add', 'add')
 			->addChild('Delete', 'delete')
@@ -246,14 +245,14 @@ TreePrinter::traverseTreeWrapper($tree->toArray());
 <form action="" method="get">
 	<p>
 		<label for="uri">URI</label>
-		<input type="text" id="uri" name="route" value="<?php echo isset($_GET['route']) ? $_GET['route'] : '/'; ?>" />
+		<input type="text" id="uri" name="route" value="<?php echo isset($_GET['route']) ? $_GET['route'] : ''; ?>" />
 		<input type="submit" value="Test" />
 	</p>
 </form>
 
 <h2>Currently matched route</h2>
 <pre>
-<?php print_r($trace); ?>
+<?php if(isset($trace)) {print_r($trace);} ?>
 </pre>
 <h2>Sitemap generated from routes</h2>
 <div>
