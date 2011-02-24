@@ -35,7 +35,7 @@ class RouterTree extends Router
 		$trace = array();
 
 		// Delete ending '/'
-		rtrim($request_uri, '/');
+		$request_uri = rtrim($request_uri, '/');
 
 		// Split URI into segments
 		$uri = $this->uriToArray($request_uri);
