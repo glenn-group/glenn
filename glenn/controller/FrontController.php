@@ -1,7 +1,9 @@
 <?php
 namespace glenn\controller;
 
-use glenn\http\Request;
+use glenn\http\Request,
+	glenn\router\Router,
+	glenn\router\RouterTree;
 
 class FrontController implements Dispatcher
 {
@@ -9,17 +11,26 @@ class FrontController implements Dispatcher
 	
     public function __construct() 
     {
-        //$this->router = new Router_Tree();
+		// Create router here temporary, this shall be done in bootstrap later.
+		// Dispatcher only need to be coupled with Router (resolveRoute).
+		$router = new RouterTree();
+
+        $this->router = Router::current();
     }
     
 	public function dispatch(Request $request)
 	{
-        //$result = $this->router->route($request->uri());
-		$result = array('controller' => 'index', 'action' => 'index');
+        try {
+			$result = $this->router->resolveRoute($request->uri());
+
+		} catch(\Exception $e) {
+			// 404
+
+		}
 		
-		$class = \ucfirst($result['controller']) . 'Controller';
+		$class = $result['controller'] . 'Controller';
 		$controller = new $class($request);
-        $method = \lcfirst($result['action']) . 'Action';
+        $method = $result['action'] . 'Action';
 		
         return $controller->{$method}();
 	}
