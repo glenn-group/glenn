@@ -27,11 +27,6 @@ class FrontController implements Dispatcher
 		return $response;
 	}
 	
-	public function events()
-	{
-		return $this->events;
-	}
-	
 	public function router()
 	{
 		return $this->router;

@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(E_ALL);
 define('APP_PATH', realpath('../app') . DIRECTORY_SEPARATOR);
 define('BASE_PATH', realpath('../../../') . DIRECTORY_SEPARATOR);
 define('ACTIVE_RECORD', realpath('../../../ActiveRecord') . DIRECTORY_SEPARATOR);
@@ -21,6 +21,7 @@ ActiveRecord\Config::initialize(function($cfg) {
                 });
 
 $request = new Request();
+
 $router = new RouterTree();
 
 $frontController = new FrontController($router);
