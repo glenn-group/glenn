@@ -1,12 +1,14 @@
 <?php
+error_reporting(E_ALL);
 define('APP_PATH', realpath('../app') . DIRECTORY_SEPARATOR);
 define('BASE_PATH', realpath('../../../') . DIRECTORY_SEPARATOR);
-
-set_include_path(APP_PATH . PATH_SEPARATOR . BASE_PATH);
+define('ACTIVE_RECORD', realpath('../../../ActiveRecord') . DIRECTORY_SEPARATOR);
+set_include_path(APP_PATH . PATH_SEPARATOR . BASE_PATH . PATH_SEPARATOR . ACTIVE_RECORD);
+require_once 'ActiveRecord.php';
 
 spl_autoload_register(function($class) {
-    require_once str_replace("\\", "/", $class) . '.php';
-});
+            require_once str_replace("\\", "/", $class) . '.php';
+        });
 
 use glenn\controller\FrontController,
 	glenn\config\Config,
@@ -29,6 +31,12 @@ $tree
 
 $router->addRoutes($tree->toArray());
 
+ActiveRecord\Config::initialize(function($cfg) {
+                    $cfg->set_model_directory('../app/models');
+                    $cfg->set_connections(array('development' => 'sqlite://blog.db'));
+                });
+
 $frontController = new FrontController($router);
 $response = $frontController->dispatch($request);
+
 $response->send();
