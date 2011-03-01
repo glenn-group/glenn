@@ -1,5 +1,5 @@
-
 <?php
- $test="Testet";
- echo $test;
+ 
+ echo $content;
+ 
 ?>

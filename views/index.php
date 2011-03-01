@@ -1,6 +1,8 @@
 <?php
+require_once('classes/View.php');
 
-include($_SERVER['DOCUMENT_ROOT'].'views/layouts/template.php'); 
+$myview = new View('testView');
 
+echo $myview;
 
 ?>
