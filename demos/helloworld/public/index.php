@@ -11,6 +11,15 @@ spl_autoload_register(function($class_name) {
 use glenn\controller\FrontController,
 	glenn\http\Request;
 
+echo '<pre>';
+$config1 = new glenn\config\Config(include APP_PATH . '/config1.php');
+$config2 = new glenn\config\Config(include APP_PATH . '/config2.php');
+//print_r($config1);
+//print_r($config2);
+$config1 = glenn\config\Config::merge($config1, $config2);
+print_r($config1);
+exit;
+
 $request = new Request();
 $router = new glenn\router\RouterTree();
 $frontController = new FrontController($router);
