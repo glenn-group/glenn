@@ -11,10 +11,23 @@ spl_autoload_register(function($class) {
 use glenn\controller\FrontController,
 	glenn\config\Config,
 	glenn\http\Request,
-	glenn\router\RouterTree;
+	glenn\router\RouterTree,
+	glenn\router\datastructures\TreeArray;
 
 $request = new Request();
-$router = new RouterTree();
+$router = new RouterTree('/glenn/demos/blogg/public');
+
+// Build routes with tree-helper (could be done with array directly)
+$tree = new TreeArray();
+$tree
+	->addParent('Blog', 'blog', '/', 'blog#index')
+		->addParent('Category', '*', '/blog', '#category')
+			->addChild('Title', '*', '#view')
+
+	->addParent('CatchAll', '*', '/', 'blog#index')
+;
+
+$router->addRoutes($tree->toArray());
 
 $frontController = new FrontController($router);
 $response = $frontController->dispatch($request);

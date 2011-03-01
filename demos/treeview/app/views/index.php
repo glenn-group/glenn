@@ -6,7 +6,7 @@ use \glenn\router\RouterTree,
 	\glenn\router\datastructures\TreeArray,
 	\glenn\router\datastructures\TreePrinter;
 
-$router = new RouterTree(false);
+$router = new RouterTree();
 $tree = new TreeArray();
 
 $tree

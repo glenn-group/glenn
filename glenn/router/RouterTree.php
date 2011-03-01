@@ -1,6 +1,8 @@
 <?php
 namespace glenn\router;
 
+use glenn\http\Request;
+
 /** Router using tree-based routing.
 */
 class RouterTree extends Router 
@@ -9,10 +11,18 @@ class RouterTree extends Router
 	*/
 	private $tree;
 
-	/** Creates an default route
-	*/
-	public function __construct() 
+	/**	Specified offset for URL
+	 */
+	private $url_offset;
+
+	/**
+	 * Creates an default route
+	 * @param string $url_offset Offset for url
+	 */
+	public function __construct($url_offset = '')
 	{
+		$this->url_offset = $url_offset;
+
 		// Default pattern
 		$this->tree['*'] = array(
 			'pattern' => '*',
@@ -29,8 +39,12 @@ class RouterTree extends Router
 	*	@return array Array with indices 'controller' and 'action'.
 	*	@throws Exception If no route found.
 	*/
-	public function resolveRoute($request_uri) 
+	public function resolveRoute(Request $request)
 	{
+		// Use offset
+		$offset_length = strlen($this->url_offset);
+		$request_uri = substr($request->uri(), $offset_length-1);
+		
 		// Store information retrived while traversing the tree
 		$trace = array();
 
@@ -70,18 +84,18 @@ class RouterTree extends Router
 			if (isset($arrayRef['children'][$uri[$i]])) {
 				$arrayRef = &$arrayRef['children'][$uri[$i]];
 				$trace['nodes'][] = $arrayRef['name'];
-
-				// Overwrite controller and action if found
-				if(isset($arrayRef['controller']) && !empty($arrayRef['controller'])) {
-					$trace['controller'] = $arrayRef['controller'];
-				}
-				if(isset($arrayRef['action']) && !empty($arrayRef['action'])) {
-					$trace['action'] = $arrayRef['action'];
-				}
 			}
 			else if (isset($arrayRef['children']['*'])) {
 				$arrayRef = &$arrayRef['children']['*'];
 				$trace['nodes'][] = $arrayRef['name'];
+			}
+
+			// Overwrite controller and action if found
+			if(isset($arrayRef['controller']) && !empty($arrayRef['controller'])) {
+				$trace['controller'] = $arrayRef['controller'];
+			}
+			if(isset($arrayRef['action']) && !empty($arrayRef['action'])) {
+				$trace['action'] = $arrayRef['action'];
 			}
 		}
 		

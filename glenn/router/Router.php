@@ -1,6 +1,8 @@
 <?php
 namespace glenn\router;
 
+use glenn\http\Request;
+
 /** Generalization of router. Only retrival of instance and matching URI to
 *	route is supported. For configuration use concrete implementation.
 */
@@ -27,7 +29,7 @@ abstract class Router
 	*	@return array Array with indices 'controller' and 'action'.
 	*	@throws Exception If no route found.
 	*/
-	abstract function resolveRoute($request_uri);
+	abstract function resolveRoute(Request $request);
 
 	/** Get current router, this should be the one that is specified by the
 	*	user application.
