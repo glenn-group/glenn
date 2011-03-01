@@ -7,7 +7,7 @@ class View
 
 	private $variables = array();
 	
-	public function __construct($template, array $variables = null)
+	public function __construct($template, array $variables = array())
 	{
 		$this->template  = $template;
 		$this->variables = $variables;
