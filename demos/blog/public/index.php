@@ -13,9 +13,25 @@ spl_autoload_register(function($class) {
 });
 
 use glenn\controller\FrontController,
-    glenn\config\Config,
-    glenn\http\Request,
-    glenn\router\RouterTree;
+	glenn\config\Config,
+	glenn\http\Request,
+	glenn\router\RouterTree,
+	glenn\router\datastructures\TreeArray;
+
+$request = new Request();
+$router = new RouterTree('/glenn/demos/blog/public');
+
+// Build routes with tree-helper (could be done with array directly)
+$tree = new TreeArray();
+$tree
+	->addParent('Blog', 'blog', '/', 'blog#index')
+		->addParent('Category', '*', '/blog', '#category')
+			->addChild('Title', '*', '#view')
+
+	->addParent('CatchAll', '*', '/', 'blog#index')
+;
+
+$router->addRoutes($tree->toArray());
 
 ActiveRecord\Config::initialize(function($cfg) {
 	$cfg->set_model_directory('../app/models');
@@ -23,7 +39,6 @@ ActiveRecord\Config::initialize(function($cfg) {
 });
 
 $request = new Request();
-$router = new RouterTree();
 $frontController = new FrontController($router);
 $response = $frontController->dispatch($request);
 $response->send();
