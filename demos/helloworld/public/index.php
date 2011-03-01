@@ -13,13 +13,16 @@ use glenn\controller\FrontController,
 $request = new Request();
 $frontController = new FrontController();
 
+
+
 $frontController->events()->bind('mvc.routing.pre', function(Event $e) {
-	echo '<pre>';
-	printf('I was called by: %s<br />', get_class($e->subject()));
-	printf('The event triggered was: %s<br />', $e->name());
-	print_r($e->params());
-	echo '</pre>';
+	echo 'pre routing';
 });
+
+$frontController->events()->bind('mvc.dispatching.post', function(Event $e) {
+	echo 'asdfasf';
+});
+
 
 $response = $frontController->dispatch($request);
 $response->send();

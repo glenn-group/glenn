@@ -83,6 +83,10 @@ class Response extends Message
             $this->status, 
             $this->statuses[$this->status]
 		));
+		
+		foreach ($this->headers as $key => $value) {
+			header(\sprintf("%s: %s", $key, $value));
+		}
 	}
 
 	/**
