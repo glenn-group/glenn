@@ -16,7 +16,7 @@ class FrontController implements Dispatcher
 	public function dispatch(Request $request)
 	{
 		//$result = $this->router->resolveRoute($request);
-		$result = array('controller' => 'blog', 'action' => 'create');
+		$result = array('controller' => 'blog', 'action' => 'index');
 		
 		$class = 'controllers\\' . \ucfirst($result['controller']) . 'Controller';
 		$controller = new $class($request);
@@ -25,11 +25,6 @@ class FrontController implements Dispatcher
         $response = $controller->{$method}();
 		
 		return $response;
-	}
-	
-	public function events()
-	{
-		return $this->events;
 	}
 	
 	public function router()

@@ -14,6 +14,7 @@ use glenn\controller\FrontController,
 	glenn\router\RouterTree;
 
 $request = new Request();
+
 $router = new RouterTree();
 
 $frontController = new FrontController($router);
