@@ -49,8 +49,8 @@ class Request extends Message
 	}
 	
 	/**
-	 * Returns the chosen GET parameter if $key is set to an array key.
-	 * To return the full GET array, use $key as the filter boolean (default true).
+	 * Returns GET parameter $key. If no key is specified, the full GET 
+	 * array is returned. Filtered by default.
 	 * 
 	 * @return array|string
 	 */
@@ -60,8 +60,8 @@ class Request extends Message
     }
     
     /**
-	 * Returns the chosen POST parameter if $key is set to an array key.
-	 * To return the full POST array, use $key as the filter boolean (default true).
+	 * Returns POST parameter $key. If no key is specified, the full POST 
+	 * array is returned. Filtered by default.
 	 * 
 	 * @return array|string
 	 */
@@ -71,8 +71,8 @@ class Request extends Message
     }
     
     /**
-	 * Private method that does the filtering for the post and get methods.
-	 * Uses the native PHP filter FILTER_SANITIZE_STRING.
+	 * Filters request parameters using native PHP filters. If no key is 
+	 * specified, the full array is returned.
 	 * 
 	 * @return array|string
 	 */

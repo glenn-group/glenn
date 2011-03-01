@@ -3,10 +3,19 @@ namespace glenn\http;
 
 class Response extends Message
 {
+	/**
+	 * @var string
+	 */
     protected $body;
     
+	/**
+	 * @var int
+	 */
     protected $status;
     
+	/**
+	 * @var array
+	 */
     protected $statuses = array(
 		100 => 'Continue',
 		101 => 'Switching Protocols',
@@ -49,6 +58,10 @@ class Response extends Message
 		504 => 'Gateway Time-out'
 	);
 
+	/**
+	 * @param string $body
+	 * @param int    $status 
+	 */
     public function __construct($body = null, $status = 200)
     {
         if ($body !== null) {
@@ -60,6 +73,9 @@ class Response extends Message
         }
     }
 
+	/**
+	 * 
+	 */
     public function sendHeaders()
     {
         header(\sprintf("%s %s %s", 
@@ -69,17 +85,26 @@ class Response extends Message
 		));
 	}
 
+	/**
+	 * 
+	 */
     public function sendBody()
     {
         echo $this->body;
     }
 
+	/**
+	 * 
+	 */
 	public function send()
 	{
         $this->sendHeaders();
 		$this->sendBody();
 	}
 	
+	/**
+	 * 
+	 */
 	public function __toString()
 	{
 		
