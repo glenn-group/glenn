@@ -1,12 +1,12 @@
 <?php
-use glenn\controller\Controller,
-    glenn\http\Response,
-	glenn\view\View;
+namespace controllers;
+
+use glenn\controller\Controller;
 
 class IndexController extends Controller
 {
     public function indexAction()
     {
-        return new Response(View::load('../app/views/index'));
+        
     }
 }
