@@ -19,8 +19,8 @@ class FrontController implements Dispatcher
 	{
 		$result = $this->router->resolveRoute($request);
 		
-		$class = 'controllers\\' . $result['controller'] . 'Controller';
-		$method = $result['action'] . 'Action';
+		$class = $this->className($result['controller']);
+		$method = $this->methodName($result['action']);
 		$controller = new $class(
 			$request, new View($result['controller'] . '/' . $result['action'])
 		);
@@ -35,5 +35,15 @@ class FrontController implements Dispatcher
 	public function router()
 	{
 		return $this->router;
+	}
+	
+	private function className($controller) 
+	{
+		return 'controllers\\' . \ucfirst($controller) . 'Controller';
+	}
+	
+	private function methodName($action)
+	{
+		return \lcfirst($action) . 'Action';
 	}
 }
