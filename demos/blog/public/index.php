@@ -1,4 +1,5 @@
 <?php
+
 define('APP_PATH', realpath('../app') . DIRECTORY_SEPARATOR);
 define('BASE_PATH', realpath('../../../') . DIRECTORY_SEPARATOR);
 define('ACTIVE_RECORD', realpath('../../../ActiveRecord') . DIRECTORY_SEPARATOR);
@@ -9,8 +10,8 @@ require_once 'ActiveRecord.php';
 error_reporting(E_ALL);
 
 spl_autoload_register(function($class) {
-	require_once str_replace("\\", "/", $class) . '.php';
-});
+			require_once str_replace("\\", "/", $class) . '.php';
+		});
 
 use glenn\controller\FrontController,
 	glenn\config\Config,
@@ -27,9 +28,7 @@ $tree
 	->addParent('Blog', 'blog', '/', 'blog#index')
 		->addParent('Category', '*', '/blog', '#category')
 			->addChild('Title', '*', '#view')
-
-	->addParent('CatchAll', '*', '/', 'blog#index')
-;
+		->addParent('CatchAll', '*', '/', 'blog#index');
 
 $router->addRoutes($tree->toArray());
 

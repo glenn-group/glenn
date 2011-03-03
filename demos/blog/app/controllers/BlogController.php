@@ -20,9 +20,7 @@ class BlogController extends Controller {
 
     public function createAction() 
 	{
-        $response = new Response(null, 303);
-        $response->addHeader('Location', 'http://glenn.blog.local/blog/');
-        return $response;
+        return Response::redirect('http://glenn.blog.local/blog/', 303);
     }
 
 }
