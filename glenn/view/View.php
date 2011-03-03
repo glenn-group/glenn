@@ -24,13 +24,18 @@ class View
 			ob_end_clean();
 			return $output;
 		} else {
-			return "File " . $this->template . ".php not found.";
+			throw new \InvalidArgumentException("View file '$file' could not be located.");
 		}
 	}
 
 	public function set($name, $value)
 	{
 		$this->variables[$name] = $value;
+	}
+	
+	public static function factory($file, $params)
+	{
+		return new View($file, $params);
 	}
 	
 	public function __set($name, $value)
@@ -40,6 +45,6 @@ class View
 
 	public function __tostring()
 	{
-		return $this->render($this->template);
+		return $this->render();
 	}
 }
