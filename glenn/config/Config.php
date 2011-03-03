@@ -1,7 +1,7 @@
 <?php
 namespace glenn\config;
 
-class Config
+class Config implements \IteratorAggregate
 {
 	protected $data = array();
 	
@@ -17,6 +17,11 @@ class Config
 		}
 	}
 	
+	public function __isset($key)
+	{
+		return isset($this->data[$key]);
+	}
+	
 	public function parse(array $data)
 	{
 		$array = array();
@@ -28,6 +33,18 @@ class Config
 			}
 		}
 		return $array;
+	}
+	
+	public function merge(Config $config)
+	{
+		foreach ($config as $key => $value) {
+			if (isset($this->data[$key]) && 
+				$this->data[$key] instanceof self && $value instanceof self) {
+				$this->data[$key]->merge($value);
+			} else {
+				$this->data[$key] = $value;
+			}
+		}
 	}
 	
 	public function toArray()
@@ -43,17 +60,8 @@ class Config
 		return $array;
 	}
 	
-	public static function merge(Config $c1, Config $c2)
-	{		
-		$a1 = $c1->toArray();
-		$a2 = $c2->toArray();
-		foreach($a2 as $key => $value) {
-			if (array_key_exists($key, $a1) && is_array($value)) {
-				$a1[$key] = self::merge(new self($a1[$key]), new self($a2[$key]));
-			} else {
-				$a1[$key] = $value;
-			}
-		}
-		return new self($a1);
+	public function getIterator()
+	{
+		return new \ArrayIterator($this->data);
 	}
 }
