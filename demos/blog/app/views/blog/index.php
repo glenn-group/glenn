@@ -1,6 +1,6 @@
 <h1>Blog posts</h1>
 <ul>
 	<? foreach ($posts as $post): ?>
-		<li><?= $post->title ?> <?= $post->content ?></li>
+		<li><strong><?= $post->title ?></strong> <?= $post->content ?></li>
 	<? endforeach ?>
 </ul>
