@@ -43,9 +43,9 @@ class RouterTree extends Router {
 	public function resolveRoute(Request $request) {
 		// Use offset
 		$offset_length = strlen($this->url_offset);
-		$request_uri = substr($request->uri(), $offset_length - 1);
+		$request_uri = substr($request->uri(), $offset_length);
 		$method = strtolower($request->method());
-
+		
 		// Store information retrived while traversing the tree
 		$trace = array();
 

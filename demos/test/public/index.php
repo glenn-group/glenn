@@ -16,7 +16,7 @@ use glenn\controller\FrontController,
  glenn\router\datastructures\TreeArray;
 
 $request = new Request();
-$router = new RouterTree('/glenn/demos/blog/public');
+$router = new RouterTree('/glenn/demos/test/public');
 
 // Build routes with tree-helper (could be done with array directly)
 $tree = new TreeArray();
