@@ -1,5 +1,5 @@
 <?php
-namespace controllers;
+namespace app\controller;
 
 use glenn\controller\Controller;
 
