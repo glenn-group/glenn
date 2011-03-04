@@ -75,11 +75,11 @@ class TreeArray implements Tree {
 		$routes['post'] = null;
 		$routes['delete'] = null;
 		$routes['put'] = null;
-		$manager = false;
+		$manager = true;
 
 		// Check if node is a entry or manager
 		if ($pattern[0] == '<' && $len = $pattern[strlen($pattern) - 1] == '>') {
-			$manager = true;
+			$manager = false;
 			$pattern = substr($pattern, 1, $len);
 		}
 
@@ -134,11 +134,12 @@ class TreeArray implements Tree {
 		$routes['post'] = null;
 		$routes['delete'] = null;
 		$routes['put'] = null;
-		$manager = false;
+		$manager = true;
 
 		// Check if node is a entry or manager
-		if ($pattern[0] == '<' && $pattern[strlen($pattern) - 1] == '>') {
-			$manager = true;
+		if ($pattern[0] == '<' && $len = $pattern[strlen($pattern) - 1] == '>') {
+			$manager = false;
+			$pattern = substr($pattern, 1, $len);
 		}
 
 		// Handle route configuration if exist
@@ -156,6 +157,7 @@ class TreeArray implements Tree {
 		$this->pointer['children'][$pattern]['name'] = $name;
 		$this->pointer['children'][$pattern]['pattern'] = $pattern;
 		$this->pointer['children'][$pattern] = \array_merge($this->pointer['children'][$pattern], $routes);
+		
 		return $this;
 	}
 

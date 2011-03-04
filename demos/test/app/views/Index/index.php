@@ -22,9 +22,9 @@ $tree
 			->addChild('Delete', 'delete', '#delete')
 			->addChild('Edit', 'edit', '#edit')
 
-	->addParent('Blog', 'blog', '/', "blog#index")
-		->addParent('Category', '*', '/blog')
-			->addChild('Title', '*')
+	->addParent('Blog', 'blog', '/', array('resource' => 'blog'))
+		->addParent('Category', '<*>', '/blog', array('resource' => 'blog'))
+			->addChild('Title', '<*>', array('resource' => 'post'))
 ;
 
 $router->addRoutes($tree->toArray());
@@ -32,8 +32,9 @@ $router->addRoutes($tree->toArray());
 // Resolve route
 if(isset($_GET['route'])) {
 	$route = $_GET['route'];
+	$method = $_GET['method'];
 	try {
-		$trace = $router->resolveRoute(new Request('/'.$route, 'GET'));
+		$trace = $router->resolveRoute(new Request('/'.$route, $method));
 	} catch(\Exception $e) {
 		$trace = array();
 		echo '404 - Route not found';
@@ -127,6 +128,12 @@ TreePrinter::traverseTreeWrapper($tree->toArray());
 	<p>
 		<label for="uri">URI</label>
 		<input type="text" id="uri" name="route" value="<?php echo isset($_GET['route']) ? $_GET['route'] : ''; ?>" />
+		<select name="method">
+			<option <?php echo (isset($_GET['method']) && $_GET['method'] == 'GET') ? 'selected="selected"' : ''; ?> value="GET">GET</option>
+			<option <?php echo (isset($_GET['method']) && $_GET['method'] == 'PUT') ? 'selected="selected"' : ''; ?>value="PUT">PUT</option>
+			<option <?php echo (isset($_GET['method']) && $_GET['method'] == 'DELETE') ? 'selected="selected"' : ''; ?>value="DELETE">DELETE</option>
+			<option <?php echo (isset($_GET['method']) && $_GET['method'] == 'POST') ? 'selected="selected"' : ''; ?>value="POST">POST</option>
+		</select>
 		<input type="submit" value="Test" />
 	</p>
 </form>
