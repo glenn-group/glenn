@@ -75,30 +75,28 @@ class Response extends Message
     /**
      * 
      */
-    public function sendHeaders() {
+    public function send() {
+		// Set headers
         header(\sprintf("%s %s %s", $this->protocol, $this->status, $this->statuses[$this->status]
                 ));
 
         foreach ($this->headers as $key => $value) {
             header(\sprintf("%s: %s", $key, $value));
         }
-    }
-
-    /**
-     * 
-     */
-    public function sendBody() {
+		
+		// Echo body
         echo $this->body;
     }
+	
+	/**
+	 *
+	 * @return string
+	 */
+	public function body()
+	{
+		return $this->body();
+	}
 
-    /**
-     * 
-     */
-    public function send() {
-        $this->sendHeaders();
-        $this->sendBody();
-    }
-    
     /**
      * @return Response
      */
