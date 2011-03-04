@@ -25,9 +25,9 @@ $router = new RouterTree('/glenn/demos/blog/public');
 // Build routes with tree-helper (could be done with array directly)
 $tree = new TreeArray();
 $tree
-	->addParent('Blog', 'blog', '/', 'blog#index')
-		->addParent('Category', '*', '/blog', '#category')
-			->addChild('Title', '*', '#view')
+	-> addParent('Blog', 'blog', '/', array('get' => 'blog#index', 'post' => 'blog#create'))
+		->addParent('Category', '<*>', '/blog', '#category')
+			->addChild('Title', '<*>', '#view')
 		->addParent('CatchAll', '*', '/', 'blog#index');
 
 $router->addRoutes($tree->toArray());
