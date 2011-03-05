@@ -60,6 +60,7 @@ class Hash
 	{
 		if ($this->hash === null && !\is_string($this->algorithm)) {
 			$this->hash = \crypt($this->string, $this->salt);
+			$this->hash = \substr($this->hash, strlen($this->salt));
 		} else if ($this->hash === null) {
 			$this->hash = \hash($this->algorithm, $this->salt . $this->string);
 		}
@@ -82,7 +83,7 @@ class Hash
 	}
 	
 	/**
-	 * Convenience method for using the factory with the Blowfish algorithm.
+	 * Convenience method for using the factory with the Blowfish crypt() algorithm.
 	 *
 	 * @param type $string
 	 * @param type $cost
@@ -94,7 +95,7 @@ class Hash
 	}
 	
 	/**
-	 * Convenience method for using the factory with the SHA-256 algorithm.
+	 * Convenience method for using the factory with the SHA-256 crypt() algorithm.
 	 *
 	 * @param type $string
 	 * @param type $cost
@@ -106,7 +107,7 @@ class Hash
 	}
 	
 	/**
-	 * Convenience method for using the factory with the SHA-512 algorithm.
+	 * Convenience method for using the factory with the SHA-512 crypt() algorithm.
 	 *
 	 * @param type $string
 	 * @param type $cost

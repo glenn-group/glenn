@@ -26,23 +26,25 @@ class ErrorHandler
 
 	}
 
-	public static function defaultErrorHandler($code, $string, $file, $line)
+	public static function defaultErrorHandler($type, $string, $file, $line)
 	{
 		// Skip errors that shouldn't be reported
-		if (!(error_reporting() & $code)) {
+		if (!(error_reporting() & $type)) {
 			return;
 		}
 
 		$code = file($file);
 
 		$start = ($line <= 3) ? 0 : $line - 3;
-		$end = (count($code) + 1 <= $line + 3) ? count($code) + 1 : $line + 3;
+		$end = (count($code) <= $line + 3) ? count($code) : $line + 3;
 
 		$errcode = array();
-		for ($i = $start; $i <= $end; $i++) {
-			$errcode[$i] = htmlentities($code[$i - 1]);
+		for ($i = $start; $i < $end; $i++) {
+			$errcode[$i+1] = htmlentities($code[$i]);
 		}
-
+		$start++;
+		$end++;
+		
 		// Clean output buffer if it's in use so we only print the error.
 		@ob_end_clean();
 		if (file_exists(APP_PATH . 'views/error.phtml')) {

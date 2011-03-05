@@ -69,7 +69,7 @@
 		<div class="error">
 			<h2><?= $string ?></h2>
 			<p>An error ocurred on <strong>line <?= $line ?></strong> in file <strong><?= $file ?></strong>.</p>
-			<ol start="<?= $line - 3 ?>">
+			<ol start="<?= $start ?>">
 				<?php foreach ($errcode as $currentLine => $code): ?>
 					<li<?= ($currentLine == $line) ? ' class="active"' : '' ?>><code><?= $code ?></code></li>
 				<?php endforeach; ?>

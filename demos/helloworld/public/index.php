@@ -6,8 +6,8 @@ set_include_path(APP_PATH . PATH_SEPARATOR . SYS_PATH);
 
 // Set up the Loader class
 require SYS_PATH . 'classes/loader/Loader.php';
-Loader::registerAutoloader();
-Loader::registerModules(array(
+glenn\loader\Loader::registerAutoloader();
+glenn\loader\Loader::registerModules(array(
 	'app'   => APP_PATH,
 	'glenn' => SYS_PATH
 ));
@@ -18,7 +18,6 @@ Loader::registerModules(array(
 use glenn\config\Config,
 	glenn\controller\FrontController,
 	glenn\http\Request,
-	glenn\loader\Loader,
 	glenn\error\ErrorHandler;
 
 ErrorHandler::register();
