@@ -6,50 +6,53 @@ class Events
 	private static $events = array();
 	
 	/**
-	 * Bind an event action to a specific trigger.
+	 * Bind a callback function to a named event.
 	 *
-	 * @param type $name event action
-	 * @param type $callable action
+	 * @param string   $name     Event name
+	 * @param Callable $callable Callback function to execute
 	 */
 	public static function bind($name, $callable)
 	{
 		if (\is_callable($callable)) {
-			static::$events[$name][] = $callable;
+			self::$events[$name][] = $callable;
 		}
 	}
 	
 	/**
 	 * Trigger the complete event chain.
 	 * 
-	 * @param Event $e
-	 * @return void 
+	 * @param  Event $e The event to trigger
+	 * @return array    Results returned by executed callback functions
 	 */
 	public static function trigger(Event $e)
 	{
-		if (!array_key_exists($e->name(), static::$events)) {
+		if (!array_key_exists($e->name(), self::$events)) {
 			return;
 		}
-		foreach (static::$events[$e->name()] as $callable) {
-			\call_user_func($callable, $e);
+		$responses = array();
+		foreach (self::$events[$e->name()] as $callable) {
+			$responses[] = \call_user_func($callable, $e);
 		}
+		return $responses;
 	}
 	
 	/**
-	 * Trigger the event chain until a function returns true.
+	 * Trigger the event chain until a callback function returns true.
 	 * 
-	 * @param Event $e
-	 * @return void 
+	 * @param  Event $e The event to trigger
+	 * @return array    Results returned by executed callback functions 
 	 */
 	public static function triggerUntil(Event $e)
 	{
-		if (!array_key_exists($e->name(), static::$events)) {
+		if (!array_key_exists($e->name(), self::$events)) {
 			return;
 		}
-		foreach (static::$events[$e->name()] as $callable) {
+		$responses = array();
+		foreach (self::$events[$e->name()] as $callable) {
 			if (\call_user_func($callable, $e) === true) {
-				return;
+				break;
 			}
-			
 		}
+		return $responses;
 	}
 }
