@@ -49,9 +49,11 @@ class Events
 		}
 		$responses = array();
 		foreach (self::$events[$e->name()] as $callable) {
-			if (\call_user_func($callable, $e) === true) {
+			$response = \call_user_func($callable, $e);
+			if ($response === true) {
 				break;
 			}
+			$responses[] = $response;
 		}
 		return $responses;
 	}

@@ -1,26 +1,23 @@
 <?php
-define('APP_PATH', realpath('../app') . DIRECTORY_SEPARATOR);
-define('SYS_PATH', realpath('../../../system') . DIRECTORY_SEPARATOR);
+define('BASE_PATH', realpath('../../../') . DIRECTORY_SEPARATOR);
+define('APP_PATH', BASE_PATH . 'demos/helloworld/app' . DIRECTORY_SEPARATOR);
+define('EXTRAS_PATH', BASE_PATH . 'extras' . DIRECTORY_SEPARATOR);
+define('SYSTEM_PATH', BASE_PATH . 'system' . DIRECTORY_SEPARATOR);
 
-set_include_path(APP_PATH . PATH_SEPARATOR . SYS_PATH);
-
-// Set up the Loader class
-require SYS_PATH . 'classes/loader/Loader.php';
-glenn\loader\Loader::registerAutoloader();
-glenn\loader\Loader::registerModules(array(
-	'app'   => APP_PATH,
-	'glenn' => SYS_PATH
-));
-
-/***********************
- *  Start application  *
- ***********************/
 use glenn\config\Config,
 	glenn\controller\FrontController,
 	glenn\http\Request,
+	glenn\loader\Loader,
 	glenn\error\ErrorHandler;
 
-ErrorHandler::register();
+require SYSTEM_PATH . 'classes/loader/Loader.php';
+Loader::registerAutoloader();
+Loader::registerModules(array(
+	'app'   => APP_PATH,
+	'glenn' => SYSTEM_PATH
+));
+
+//ErrorHandler::register();
 
 $request = new Request();
 $router = new glenn\router\RouterTree();
