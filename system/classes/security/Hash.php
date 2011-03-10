@@ -22,6 +22,16 @@ class Hash
 	 * Constant for the SHA-512 algorithm.
 	 */
 	const SHA512 = 2;
+	
+	/**
+	 * Constant for the SHA-1 algorithm.
+	 */
+	const SHA1 = 3;
+	
+	/**
+	 * Constant for the MD5 algorithm.
+	 */
+	const MD5 = 4;
 
 	/* Instance variables */
 	private $algorithm;
@@ -58,11 +68,21 @@ class Hash
 	 */
 	public function hash()
 	{
-		if ($this->hash === null && !\is_string($this->algorithm)) {
-			$this->hash = \crypt($this->string, $this->salt);
-			$this->hash = \substr($this->hash, strlen($this->salt));
-		} else if ($this->hash === null) {
-			$this->hash = \hash($this->algorithm, $this->salt . $this->string);
+		if ($this->hash === null) {
+			switch ($this->algorithm) {
+				case Hash::BLOWFISH:
+				case Hash::SHA256:
+				case Hash::SHA512:
+					$this->hash = \crypt($this->string, $this->salt);
+					$this->hash = \substr($this->hash, strlen($this->salt));
+					break;
+				case Hash::SHA1:
+					$this->hash = \sha1($this->salt . $this->string);
+					break;
+				case Hash::MD5:
+					$this->hash = \md5($this->salt . $this->string);
+					break;
+			}	
 		}
 
 		return $this->hash;
@@ -101,7 +121,7 @@ class Hash
 	 * @param type $cost
 	 * @return Hash 
 	 */
-	public static function sha256($string, $cost = null)
+	public static function cryptSha256($string, $cost = null)
 	{
 		return static::factory(Hash::SHA256, $string, $cost);
 	}
@@ -113,7 +133,7 @@ class Hash
 	 * @param type $cost
 	 * @return Hash 
 	 */
-	public static function sha512($string, $cost = null)
+	public static function cryptSha512($string, $cost = null)
 	{
 		return static::factory(Hash::SHA512, $string, $cost);
 	}
@@ -126,7 +146,7 @@ class Hash
 	 */
 	public static function sha1($string)
 	{
-		return static::factory('sha1', $string);
+		return static::factory(Hash::SHA1, $string);
 	}
 	
 	/**
@@ -137,7 +157,7 @@ class Hash
 	 */
 	public static function md5($string)
 	{
-		return static::factory('md5', $string);
+		return static::factory(Hash::MD5, $string);
 	}
 
 	/**
@@ -148,14 +168,18 @@ class Hash
 	 */
 	public static function generateSalt($algorithm, $cost = null)
 	{
-		if ($algorithm === Hash::BLOWFISH) {
-			return ($cost === null) ? static::saltBlowfish() : static::saltBlowfish($cost);
-		} else if ($algorithm === Hash::SHA256) {
-			return ($cost === null) ? static::saltSha256() : static::saltSha256($cost);
-		} else if ($algorithm === Hash::SHA512) {
-			return ($cost === null) ? static::saltSha512() : static::saltSha512($cost);
-		} else {
-			return static::randomString(16);
+		switch ($algorithm) {
+			case Hash::BLOWFISH:
+				return ($cost === null) ? static::saltBlowfish() : static::saltBlowfish($cost);
+				break;
+			case Hash::SHA256:
+				return ($cost === null) ? static::saltSha256() : static::saltSha256($cost);
+				break;
+			case Hash::SHA512:
+				return ($cost === null) ? static::saltSha512() : static::saltSha512($cost);
+				break;
+			default:
+				return static::randomString(16);
 		}
 	}
 
@@ -220,6 +244,11 @@ class Hash
 		return $string;
 	}
 
+	/**
+	 * Return the hash.
+	 *
+	 * @return string
+	 */
 	public function __toString()
 	{
 		return $this->hash();
