@@ -31,7 +31,7 @@ class Events
 		}
 		$responses = array();
 		foreach (self::$events[$e->name()] as $callable) {
-			$responses[] = \call_user_func($callable, $e);
+			$responses[] = \call_user_func_array($callable, $e);
 		}
 		return $responses;
 	}

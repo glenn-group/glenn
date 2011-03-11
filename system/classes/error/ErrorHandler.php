@@ -4,6 +4,7 @@ namespace glenn\error;
 
 class ErrorHandler
 {
+	protected static $linesAround = 7;
 
 	public static function register($handler = null)
 	{
@@ -36,8 +37,8 @@ class ErrorHandler
 
 		$code = file($file);
 
-		$start = ($line <= 3) ? 0 : $line - 3;
-		$end = (count($code) <= $line + 3) ? count($code) : $line + 3;
+		$start = ($line <= self::$linesAround + 1) ? 0 : $line - self::$linesAround - 1;
+		$end = (count($code) <= $line + self::$linesAround) ? count($code) : $line + self::$linesAround;
 
 		$errcode = array();
 		for ($i = $start; $i < $end; $i++) {
