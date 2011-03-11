@@ -1,38 +1,26 @@
 <?php
-set_include_path('../app/controllers' . PATH_SEPARATOR . '../../../');
+define('BASE_PATH', realpath('../../../') . DIRECTORY_SEPARATOR);
+define('APP_PATH', BASE_PATH . 'demos/helloworld/app' . DIRECTORY_SEPARATOR);
+define('EXTRAS_PATH', BASE_PATH . 'extras' . DIRECTORY_SEPARATOR);
+define('SYSTEM_PATH', BASE_PATH . 'system' . DIRECTORY_SEPARATOR);
 
-spl_autoload_register(function($class_name) {
-    require_once str_replace("\\", "/", $class_name) . '.php';
-});
+use glenn\config\Config,
+	glenn\controller\FrontController,
+	glenn\http\Request,
+	glenn\loader\Loader,
+	glenn\error\ErrorHandler;
 
-use glenn\controller\FrontController,
-	glenn\config\Config,
-	glenn\event\Event,
-	glenn\http\Request;
+require SYSTEM_PATH . 'classes/loader/Loader.php';
+Loader::registerAutoloader();
+Loader::registerModules(array(
+	'app'   => APP_PATH,
+	'glenn' => SYSTEM_PATH
+));
+
+//ErrorHandler::register();
 
 $request = new Request();
-$frontController = new FrontController();
-
-
-
-$frontController->events()->bind('mvc.routing.pre', function(Event $e) {
-	echo 'pre routing';
-});
-
-$frontController->events()->bind('mvc.dispatching.post', function(Event $e) {
-	echo 'asdfasf';
-});
-
-
+$router = new glenn\router\RouterTree();
+$frontController = new FrontController($router);
 $response = $frontController->dispatch($request);
 $response->send();
-
-$config = new glenn\config\Ini('../app/config.ini');
-echo '<pre>';
-print_r($config->toArray());
-echo '</pre>';
-
-/*$config = new Config(include '../app/config.php');
-echo '<pre>';
-print_r($config->toArray());
-echo '</pre>';*/
