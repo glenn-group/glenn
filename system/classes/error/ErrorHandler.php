@@ -19,7 +19,8 @@ class ErrorHandler
 		\register_shutdown_function(function ($handler) {
 			$error = error_get_last();
 			if ($error['type'] == 1) {
-				\call_user_func_array($handler, array($error['type'], $error['message'], $error['file'], $error['line']));
+				\call_user_func_array($handler, 
+						array($error['type'], $error['message'], $error['file'], $error['line']));
 				exit($error['type']);
 			}
 		}, $handler);
@@ -47,13 +48,10 @@ class ErrorHandler
 		
 		// Clean output buffer if it's in use so we only print the error.
 		@ob_end_clean();
-		if (file_exists(APP_PATH . 'views/error.phtml')) {
-			include APP_PATH . 'views/error.phtml';
-		} else {
-			include SYS_PATH . 'views/error.phtml';
-		}
-
-		// Halt all execution. Should depend on error reporting settings.
+		
+		include \glenn\loader\Loader::findView('error');
+		
+		// Halt all execution. TODO: Should depend on error reporting settings.
 		exit(-1);
 		// The normal course of action, if we do not exit.
 		return true;

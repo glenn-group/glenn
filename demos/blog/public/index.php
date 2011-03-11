@@ -19,7 +19,7 @@ Loader::registerModules(array(
 	'glenn' => SYSTEM_PATH
 ));
 
-//ErrorHandler::register();
+ErrorHandler::register();
 
 $tree = new TreeArray();
 $tree->addParent('Blog', 'blog', '/', array('get' => 'blog#index', 'post' => 'blog#create'));

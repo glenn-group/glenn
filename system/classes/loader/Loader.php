@@ -54,6 +54,21 @@ class Loader
 	}
 	
 	/**
+	 * Locate a view file as high up as possible in the list of modules.
+	 *
+	 * @param string $view 
+	 * @return string path to view
+	 */
+	public static function findView($view)
+	{
+		foreach (self::$modules as $module => $path) {
+			if (\file_exists($path . 'views/' . $view . '.phtml')) {
+				return $path . 'views/' . $view . '.phtml';
+			}
+		}
+	}
+	
+	/**
 	 * 
 	 */
 	public static function registerAutoloader()
