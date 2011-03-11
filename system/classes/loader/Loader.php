@@ -13,7 +13,7 @@ class Loader
 					    . 'classes' 
 					    . str_replace('\\', '/', \substr($class, \strlen($module))) 
 						. '.php';
-				break;
+				return;
 			}
 		}
 	}
