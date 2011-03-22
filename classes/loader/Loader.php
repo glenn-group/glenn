@@ -69,6 +69,38 @@ class Loader
 	}
 	
 	/**
+	 * Locate a class as high up as possible in the list of modules.
+	 *
+	 * @param string $view 
+	 * @return string path to view
+	 */
+	public static function resolve($class)
+	{
+		if(\substr($class, 0, 1) !== '\\') {
+			// Absolute path
+			return $class;/*
+			return self::$modules[\substr($class, 0, \strpos($class, '\\'))] .
+					self::$classPrefix . DIRECTORY_SEPARATOR . \str_replace(
+							'\\',
+							DIRECTORY_SEPARATOR,
+							\substr($class, \strpos($class, '\\') + 1)
+					) . self::$classSuffix;*/
+		} else {
+			// Relative path, search through modules
+			foreach (self::$modules as $module => $path) {
+				$fullPath = $path . self::$classPrefix .
+						\str_replace('\\', DIRECTORY_SEPARATOR, $class) .
+						self::$classSuffix;
+				if (\file_exists($fullPath)) {
+					return $module . $class;
+					//return $fullPath;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * 
 	 */
 	public static function registerAutoloader()

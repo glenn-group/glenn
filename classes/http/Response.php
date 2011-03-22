@@ -102,7 +102,7 @@ class Response extends Message
      */
     public static function redirect($url, $status = 302)
     {
-        $response = new Response(null, $status);
+        $response = new static(null, $status);
         $response->addHeader('Location', $url);
         return $response;
     }
