@@ -4,7 +4,7 @@ namespace glenn\controller;
 use glenn\http\Request,
 	glenn\http\Response,
 	glenn\router\Router,
-	glenn\view\View;
+	_\view\View;
 
 class FrontController implements Dispatcher
 {
@@ -22,8 +22,9 @@ class FrontController implements Dispatcher
 		$class = $this->className($result['controller']);
 		$method = $this->methodName($result['action']);
 		$action = \lcfirst($result['controller']) . '/' . $result['action'];
+		$view = new View($action);
 		$controller = new $class(
-			$request, new View($action)
+			$request, $view
 		);
 		
 		$result = $controller->{$method}();

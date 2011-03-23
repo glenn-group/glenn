@@ -38,8 +38,13 @@ class Loader
 	 *
 	 * @param string $class 
 	 */
-	public static function load($class)
+	public static function load($className)
 	{
+		if(\strpos($className, '_') === 0) {
+			$class = static::resolve(\substr($className, 1));
+		} else {
+			$class = $className;
+		}
 		foreach (self::$modules as $module => $path) {
 			if (\strpos($class, $module) === 0) {
 				require(
@@ -48,6 +53,9 @@ class Loader
 					\str_replace('\\', '/', \substr($class, \strlen($module))).
 					self::$classSuffix
 				);
+				if($class !== $className) {
+					\class_alias($class, $className);
+				}
 				return;
 			}
 		}
