@@ -1,10 +1,8 @@
 <?php
-
 namespace glenn\http;
 
 class Response extends Message
 {
-
     /**
      * @var string
      */
@@ -59,53 +57,72 @@ class Response extends Message
     );
 
     /**
-     * @param string $body
-     * @param int    $status 
+     * @param  string $body
+     * @return Response
      */
-    public function __construct($body = null, $status = 200) {
-        if ($body !== null) {
-            $this->body = $body;
-        }
-
-        if (array_key_exists($status, $this->statuses)) {
-            $this->status = $status;
-        }
-    }
-
-    /**
-     * 
-     */
-    public function send() {
-		// Set headers
-        header(\sprintf("%s %s %s", $this->protocol, $this->status, $this->statuses[$this->status]
-                ));
-
-        foreach ($this->headers as $key => $value) {
-            header(\sprintf("%s: %s", $key, $value));
-        }
-		
-		// Echo body
-        echo $this->body;
+    public static function internalError($body, $status = 500)
+    {
+        return new self($body, $status);
     }
 	
 	/**
-	 *
-	 * @return string
-	 */
-	public function body()
-	{
-		return $this->body();
-	}
-
+     * @param  string $body
+     * @return Response
+     */
+    public static function notFound($body, $status = 404)
+    {
+        return new self($body, $status);
+    }
+    
     /**
      * @return Response
      */
     public static function redirect($url, $status = 302)
     {
-        $response = new Response(null, $status);
-        $response->addHeader('Location', $url);
-        return $response;
+        return new self(null, $status, array(
+            'Location' => $url
+        ));
     }
+    
+    /**
+     * @param string $body
+     * @param int    $status 
+     */
+    public function __construct($body = null, $status = 200, array $headers = array()) 
+    {
+        if ($body !== null) {
+            $this->body = $body;
+        }
+        if (array_key_exists($status, $this->statuses)) {
+            $this->status = $status;
+        }
+        $this->headers = $headers;
+    }
+
+    /**
+     * 
+     */
+    public function send() 
+	{
+        header(\sprintf(
+            "%s %s %s", 
+            $this->protocol, 
+            $this->status, 
+            $this->statuses[$this->status]
+        ));
+        foreach ($this->headers as $key => $value) {
+            header(\sprintf("%s: %s", $key, $value));
+        }
+        echo $this->body;
+    }
+	
+	/**
+	 * @return string
+	 */
+	public function body()
+	{
+		return $this->body;
+	}
 
     /**
      * 
@@ -113,5 +130,4 @@ class Response extends Message
     public function __toString() {
         
     }
-
 }

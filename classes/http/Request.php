@@ -17,7 +17,7 @@ class Request extends Message
 	 * @param string $uri
 	 * @param string $method
 	 */
-	public function __construct($uri = null, $method = null)
+	public function __construct($uri = null, $method = null, $headers = array())
 	{
         if ($uri !== null) {
             $this->uri = $uri;
@@ -30,6 +30,8 @@ class Request extends Message
         } else if ($_SERVER['REQUEST_METHOD'] !== null) {
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
+        
+        $this->headers = $headers;
     }
 	
 	/**

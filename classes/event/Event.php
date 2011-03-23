@@ -26,6 +26,14 @@ class Event
 		return $this->name;
 	}
 	
+	public function param($key)
+	{
+		if (\array_key_exists($key, $this->params)) {
+			return $this->params[$key];
+		}
+		throw new \Exception('No such parameter');
+	}
+	
 	public function params()
 	{
 		return $this->params;

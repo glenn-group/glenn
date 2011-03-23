@@ -19,6 +19,32 @@ class Message
 	 */
 	public function addHeader($key, $value)
 	{
-		$this->headers[$key] = $value;
+		if (\array_key_exists($key, $this->headers)) {
+			if (\is_array($this->headers[$key])) {
+				$this->headers[$key][] = $value;
+			} else {
+				$this->headers[$key] = array(
+					$this->headers[$key], $value
+				);
+			}
+		} else {
+			$this->headers[$key] = $value;
+		}
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function headers()
+	{
+		return $this->headers;
+	}
+	
+	/**
+	 * @param type $protocol 
+	 */
+	public function setProtocol($protocol)
+	{
+		$this->protocol = $protocol;
 	}
 }
