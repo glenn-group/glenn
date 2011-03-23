@@ -21,8 +21,9 @@ class FrontController implements Dispatcher
 		
 		$class = $this->className($result['controller']);
 		$method = $this->methodName($result['action']);
+		$action = \lcfirst($result['controller']) . '/' . $result['action'];
 		$controller = new $class(
-			$request, new View(\lcfirst($result['controller']) . '/' . $result['action'])
+			$request, new View($action)
 		);
 		
 		$result = $controller->{$method}();

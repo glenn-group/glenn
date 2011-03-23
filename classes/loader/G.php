@@ -16,4 +16,16 @@ class G
 		}
 	}
 	
+	public static function call($call, array $params = array())
+	{
+		list($class, $method) = \explode('::', $call);
+		$class = Loader::resolve($class);
+		\call_user_func_array(array($class, $method), $params);
+	}
+	
+	public static function resolve($class)
+	{
+		return Loader::resolve($class);
+	}
+	
 }
