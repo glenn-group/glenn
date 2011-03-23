@@ -14,6 +14,10 @@ class Request extends Message
 	protected $uri;
     
 	/**
+	 * Leaving the parameters of the constructor empty will cause the object to use the information
+	 * of the current HTTP request. The request method can be overwritten using a POST parameter 
+	 * named _method.
+	 * 
 	 * @param string $uri
 	 * @param string $method
 	 */
