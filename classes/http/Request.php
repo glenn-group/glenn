@@ -27,6 +27,8 @@ class Request extends Message
         
         if ($method !== null) {
             $this->method = $method;
+		} else if(isset($_POST['_method'])) {
+			$this->method = $_POST['_method'];
         } else if ($_SERVER['REQUEST_METHOD'] !== null) {
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
