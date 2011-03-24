@@ -1,7 +1,7 @@
 <?php
 namespace glenn\router;
 
-use glenn\http\Request;
+use glenn\http\interfaces\Request;
 
 /** Generalization of router. Only retrival of instance and matching URI to
 *	route is supported. For configuration use concrete implementation.
@@ -20,7 +20,6 @@ abstract class Router
 	{
 		if ($store) {
 			self::$currentRouter = $this;
-
 		}
 	}
 
@@ -29,7 +28,7 @@ abstract class Router
 	*	@return array Array with indices 'controller' and 'action'.
 	*	@throws Exception If no route found.
 	*/
-	abstract function resolveRoute(Request $request);
+	abstract function route(Request $request);
 
 	/** Get current router, this should be the one that is specified by the
 	*	user application.
@@ -40,10 +39,8 @@ abstract class Router
 	{
 		if (isset(self::$currentRouter)) {
 			return self::$currentRouter;
-
 		} else {
 			throw new Exception('No router exist');
-
 		}
 	}
 

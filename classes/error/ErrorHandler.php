@@ -16,15 +16,16 @@ class ErrorHandler
 		
 		// Let's grab those mother-fuhring fatal errors!
 		// Kind of a hack so make sure we exit afterwards.
+		/*
 		\ini_set('display_errors', 0);
 		\register_shutdown_function(function ($handler) {
 			$error = error_get_last();
 			if ($error['type'] == 1) {
 				\call_user_func_array($handler, 
 						array($error['type'], $error['message'], $error['file'], $error['line']));
-				exit($error['type']);
+				//exit($error['type']);
 			}
-		}, $handler);
+		}, $handler);*/
 
 	}
 

@@ -1,7 +1,7 @@
 <?php
 namespace glenn\controller;
 
-use glenn\http\Request;
+use glenn\http\interfaces\Request;
 
 interface Dispatcher
 {

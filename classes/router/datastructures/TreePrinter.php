@@ -1,8 +1,6 @@
 <?php
 namespace glenn\router\datastructures;
 
-use \SplStack as SplStack;
-
 /** Helper class to test tree routes by creating a graphical site map
 */
 class TreePrinter
