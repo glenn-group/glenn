@@ -1,7 +1,7 @@
 <?php
-namespace glenn\config;
+namespace glenn\config\adapter;
 
-class Ini extends Config
+class Ini extends Adapter
 {
 	public function __construct($filename)
 	{

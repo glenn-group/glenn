@@ -67,11 +67,12 @@ class Loader
 	 * @param string $view 
 	 * @return string path to view
 	 */
-	public static function findView($view)
+	public static function find($type, $file)
 	{
+		$filePath = $type . DIRECTORY_SEPARATOR . $file;
 		foreach (self::$modules as $module => $path) {
-			if (\file_exists($path . 'views/' . $view . '.phtml')) {
-				return $path . 'views/' . $view . '.phtml';
+			if (\file_exists($path . $filePath)) {
+				return $path . $filePath;
 			}
 		}
 	}
@@ -86,15 +87,13 @@ class Loader
 	{
 		if(\substr($class, 0, 1) !== '\\') {
 			// Absolute path
-			return $class;/*
-			return self::$modules[\substr($class, 0, \strpos($class, '\\'))] .
-					self::$classPrefix . DIRECTORY_SEPARATOR . \str_replace(
-							'\\',
-							DIRECTORY_SEPARATOR,
-							\substr($class, \strpos($class, '\\') + 1)
-					) . self::$classSuffix;*/
+			return $class;
 		} else {
 			// Relative path, search through modules
+			$config = \glenn\config\Config::factory('classes.php');
+			if(isset($config->$class)) {
+				return $config->$class;
+			}
 			foreach (self::$modules as $module => $path) {
 				$fullPath = $path . self::$classPrefix .
 						\str_replace('\\', DIRECTORY_SEPARATOR, $class) .
