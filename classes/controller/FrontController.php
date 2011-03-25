@@ -2,9 +2,10 @@
 namespace glenn\controller;
 
 use glenn\http\interfaces\Request,
-	glenn\http\interfaces\Response,
+	glenn\http\interfaces\Response as IResponse,
 	glenn\router\Router,
-	_\view\View;
+	_\view\View,
+	glenn\http\Response;
 
 class FrontController implements Dispatcher
 {
@@ -28,10 +29,10 @@ class FrontController implements Dispatcher
 		);
 		
 		$result = $controller->{$method}();
-		if ($result instanceof Response) {
+		if ($result instanceof IResponse) {
 			return $result;
 		}
-		return new \glenn\http\Response($controller->view()->render());
+		return new Response($controller->view()->render());
 	}
 	
 	public function router()
