@@ -77,7 +77,7 @@ class Request extends Message implements interfaces\Request
 		if (\array_key_exists($name, $this->cookies)) {
 			return $this->cookies[$name];
 		} else if (isset($_COOKIE[$name])) {
-			$this->cookies[$name] = \unserialize(\base64_decode($_COOKIE[$name]));
+			$this->cookies[$name] = Cookie::get($name);
 			return $this->cookies[$name];
 		} else {
 			return false;

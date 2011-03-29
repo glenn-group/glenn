@@ -11,6 +11,16 @@ class Cookie
 	private $domain;
 	private $secure;
 	private $httponly;
+	
+	protected static $defaults = array(
+		'name' => null,
+		'value' => null,
+		'expiry' => 0,
+		'path' => '',
+		'domain' => '',
+		'secure' => false,
+		'httponly' => true
+	);
 
 	/**
 	 * The Cookie constructor takes the same parameters as the setcookie function of PHP.
@@ -35,10 +45,35 @@ class Cookie
 		$this->httponly = $httponly;
 	}
 	
+	/**
+	 * Return a specified cookie object from the user's cookies.
+	 *
+	 * @param type $name
+	 * @return type 
+	 */
+	public static function get($name)
+	{
+		$config = array_merge(static::$defaults, \unserialize(\urldecode($_COOKIE[$name])));
+		$config['name'] = $name;
+		$ref = new \ReflectionClass(\get_class());
+		$cookie = $ref->newInstanceArgs($config);
+		return $cookie;
+	}
+	
+	/**
+	 * Save all non-default values of the cookie object as a serialized array in a new cookie.
+	 */
 	public function save()
 	{
-		$value = \base64_encode(\serialize($this));
-		setcookie($this->name, $value, $this->expiry, $this->path, $this->domain, $this->secure, $this->httponly);
+		$data = \get_object_vars($this);
+		unset($data['name']);
+		foreach ($data as $key => $value) {
+			if(static::$defaults[$key] === $value) {
+				unset($data[$key]);
+			}
+		}
+		$data = \urlencode(\serialize($data));
+		setcookie($this->name, $data, $this->expiry, $this->path, $this->domain, $this->secure, $this->httponly);
 	}
 	
 	public function delete()
@@ -104,6 +139,34 @@ class Cookie
 	public function setHttpOnly($httponly)
 	{
 		$this->httponly = $httponly;
+	}
+	
+	public function __sleep()
+	{
+		$fields = array('name', 'value');
+		if($this->path !== '') {
+			$fields[] = 'path';
+		}
+		if($this->domain !== '') {
+			$fields[] = 'domain';
+		}
+		if($this->expiry !== 0) {
+			$fields[] = 'expiry';
+		}
+		return $fields;
+	}
+	
+	public function __wakeup()
+	{
+		if($this->path === null) {
+			$this->path = '';
+		}
+		if($this->domain === null) {
+			$this->domain = '';
+		}
+		if($this->expiry === null) {
+			$this->expiry = 0;
+		}
 	}
 
 }
