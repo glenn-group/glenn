@@ -54,9 +54,7 @@ class EventHandler
 		// Default break callback function
 		if ($break === null) {
 			$break = function($response) {
-				if ($response === true) {
-					return true;
-				}
+				return ($response === true);
 			};
 		} else if (!is_callable($break)) {
 			throw new \Exception('Invalid callback provided');
@@ -72,15 +70,15 @@ class EventHandler
 		// Iterate over registered callbacks
 		foreach ($this->events[$e->name()] as $callback) {
 			
-			// Execute callback function with triggered event as parameter
-			$response = \call_user_func($callback, $e);
+			// Execute callback with event and responses as parameters
+			$response = \call_user_func($callback, $e, $responses);
 			
-			// Add response if callback evaluates to true
+			// Add response if filter callback evaluates to true
 			if (\call_user_func($filter, $response)) {
 				$responses[] = $response;
 			}
 			
-			// Stop propagation if callback evaluates to true
+			// Stop propagation if break callback evaluates to true
 			if (\call_user_func($break, $response)) {
 				break;
 			}

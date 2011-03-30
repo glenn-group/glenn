@@ -9,10 +9,15 @@ class Request extends Message
     protected $method;
 	
 	/**
+	 * @var array
+	 */
+	protected $params = array();
+	
+	/**
 	 * @var string
 	 */
 	protected $uri;
-    
+	
 	/**
 	 * @param string $uri
 	 * @param string $method
@@ -78,7 +83,7 @@ class Request extends Message
 	 * 
 	 * @return array|string
 	 */
-    private function param($key, $filter, $type)
+    protected function paramram($key, $filter, $type)
 	{
         if ($key === null || $key === true) {
             return filter_input_array($type, FILTER_SANITIZE_STRING) ?: array();
@@ -90,6 +95,29 @@ class Request extends Message
             return filter_input($type, $key, FILTER_UNSAFE_RAW);
         }
     }
+	
+	public function param($key)
+	{
+		if (\array_key_exists($key, $this->params)) {
+			return $this->params[$key];
+		}
+		throw new \Exception('No such parameter');
+	}
+	
+	public function setParam($key, $value) 
+	{
+		$this->params[$key] = $value;
+	}
+	
+	public function __get($key)
+	{
+		return $this->param($key);
+	}
+	
+	public function __set($key, $value)
+	{
+		$this->setParam($key, $value);
+	}
 	
 	/**
 	 * @return string

@@ -1,18 +1,23 @@
 <?php
 namespace glenn\controller;
 
-use glenn\event\Event,
-    glenn\http\Request,
-    glenn\view\View;
+use glenn\event\Event;
+use glenn\http\Request;
+use glenn\http\Response;
+use glenn\view\View;
 
 abstract class Controller
 {
 	/**
+	 * Registered after filters
+	 * 
 	 * @var array
 	 */
 	protected $after = array();
 	
 	/**
+	 * Registered before filters
+	 * 
 	 * @var array
 	 */
 	protected $before = array();
@@ -26,6 +31,11 @@ abstract class Controller
 	 * @var Request
 	 */
     protected $request;
+	
+	/**
+	 * @var Response
+	 */
+	protected $response;
 	
 	/**
 	 * @var View
@@ -45,7 +55,7 @@ abstract class Controller
 		}
 		$controller = new $class($dispatcher, $request);
 		if (!$controller instanceof self) {
-			throw new \Exception("Class $class is not an instance of Controller");
+			throw new \Exception("Class $class not instance of Controller");
 		}
 		return $controller;
     }
@@ -56,17 +66,37 @@ abstract class Controller
 	 */
     public function __construct(Dispatcher $dispatcher, Request $request)
     {
-        $this->dispatcher = $dispatcher;
+        //$this->dispatcher = $dispatcher;
         $this->request    = $request;
+		//$this->view       = new View();
 		
 		/*
-		$this->dispatcher()->events()->bind('glenn:dispatching:before', function(Event $e) {
-			
+		// Trigger before filters
+		foreach ($this->before as $before) {
+			$this->dispatcher()->events()->bind(
+				'glenn.dispatching.before', function(Event $e) use($before) {
+					return \call_user_func(array($e->subject(), $before));
+				}
+			);
+		}
+		
+		// Automagically create a response from the controller's view object
+		$this->dispatcher()->events()->bind('glenn.dispatching.after', function(Event $e) {
+			$e->subject()->view()->setTemplate(
+				$e->subject()->request()->controller . '/' .
+				$e->subject()->request()->action
+			);
+			$e->subject()->setResponse(new Response($e->subject()->view()));
 		});
 		
-		$this->dispatcher()->events()->bind('glenn:dispatching:after', function(Event $e) {
-			
-		});
+		// Trigger after filters
+		foreach ($this->after as $after) {
+			$this->dispatcher()->events()->bind(
+				'glenn.dispatching.after', function(Event $e) use($after) {
+					return \call_user_func(array($e->subject(), $after));
+				}
+			);
+		}
 		 */
     }
 	
@@ -87,10 +117,34 @@ abstract class Controller
 	}
 	
 	/**
+	 * @return Response
+	 */
+	public function response()
+	{
+		return $this->response;
+	}
+	
+	/**
+	 * @param Response $response 
+	 */
+	public function setResponse(Response $response)
+	{
+		$this->response = $response;
+	}
+	
+	/**
 	 * @return View
 	 */
 	public function view()
 	{
 		return $this->view;
+	}
+	
+	/**
+	 * @param View $view
+	 */
+	public function setView(View $view)
+	{
+		$this->view = $view;
 	}
 }
