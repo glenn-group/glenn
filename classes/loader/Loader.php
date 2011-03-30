@@ -26,12 +26,18 @@ class Loader
 	 */
 	public static function bootstrapModules()
 	{
-		foreach (self::$modules as $module => $path) {
+		$modules = \array_reverse(self::$modules);
+		foreach ($modules as $module => $path) {
 			$bootstrap = $path.'bootstrap.php';
 			if (\file_exists($bootstrap)) {
 				require($bootstrap);
 			}
 		}
+	}
+	
+	public static function isRegistered($module)
+	{
+		return \array_key_exists($module, self::$modules);
 	}
 	
 	/**
@@ -48,24 +54,18 @@ class Loader
 					\str_replace('\\', '/', \substr($class, \strlen($module))).
 					self::$classSuffix
 				);
-				return;
+				break;
 			}
 		}
 	}
 	
 	/**
-	 * Locate a view file as high up as possible in the list of modules.
 	 *
-	 * @param string $view 
-	 * @return string path to view
+	 * @return array
 	 */
-	public static function findView($view)
+	public static function modules()
 	{
-		foreach (self::$modules as $module => $path) {
-			if (\file_exists($path . 'views/' . $view . '.phtml')) {
-				return $path . 'views/' . $view . '.phtml';
-			}
-		}
+		return self::$modules;
 	}
 	
 	/**

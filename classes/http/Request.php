@@ -4,6 +4,12 @@ namespace glenn\http;
 class Request extends Message
 {
 	/**
+	 *
+	 * @var array
+	 */
+	private $allowedMethods = array('POST', 'GET', 'PUT', 'DELETE');
+	
+	/**
 	 * @var string
 	 */
     protected $method;
@@ -14,6 +20,10 @@ class Request extends Message
 	protected $uri;
     
 	/**
+	 * Leaving the parameters of the constructor empty will cause the object to use the information
+	 * of the current HTTP request. The request method can be overwritten using a POST parameter 
+	 * named _method.
+	 * 
 	 * @param string $uri
 	 * @param string $method
 	 */
@@ -27,9 +37,17 @@ class Request extends Message
         
         if ($method !== null) {
             $this->method = $method;
-        } else if ($_SERVER['REQUEST_METHOD'] !== null) {
+		} else if (isset($_POST['_method'])) {
+			$this->method = $_POST['_method'];
+        } else if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+			$this->method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+		} else if ($_SERVER['REQUEST_METHOD'] !== null) {
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
+		
+		if(!\in_array($this->method, $this->allowedMethods)) {
+			throw new Exception('HTTP method "' . $this->method . '" not allowed!');
+		}
     }
 	
 	/**
