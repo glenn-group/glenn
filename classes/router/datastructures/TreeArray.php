@@ -26,37 +26,26 @@ class TreeArray implements Tree {
 	private function arrayToRoute($config, $manager) {
 		$routes = array();
 
+		
 		// Create routes for resource
 		if (isset($config['resource'])) {
 			$controller = $config['resource'];
-
-			if ($manager) {
-				$routes['get'] = array(
+			/*
+			$map = $manager ? array(
+				'get' => "index",
+				'post' => "create",
+			) : array(
+				'get' => "show",
+				'put' => 'update',
+				'delete' => 'destroy'
+			)
+			foreach($map as $k => $v){
+				$routes[$k] = array(
 					'controller' => $controller,
-					'action' => 'index'
-				);
-				$routes['post'] = array(
-					'controller' => $controller,
-					'action' => 'create'
-				);
-			} else { // Use specified routes
-				$routes['get'] = array(
-					'controller' => $controller,
-					'action' => 'show'
-				);
-				$routes['post'] = array(
-					'controller' => $controller,
-					'action' => 'create'
-				);
-				$routes['put'] = array(
-					'controller' => $controller,
-					'action' => 'update'
-				);
-				$routes['delete'] = array(
-					'controller' => $controller,
-					'action' => 'destroy'
+					'action' => $v
 				);
 			}
+			*/
 		}
 
 		// Overwrite if any other routes where specified
