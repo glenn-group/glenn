@@ -4,18 +4,29 @@ namespace glenn\http;
 
 class Cookie
 {
+	/** Cookie data **/
 	private $name;
 	private $value;
-	private $expiry;
+	private $maxAge;
 	private $path;
 	private $domain;
 	private $secure;
 	private $httponly;
 	
+	/** Variables for internal logic **/
+	private $changed = false;
+	private $saved = false;
+	
+	/** Constants for cookie max age **/
+	const MINUTE = 60;
+	const HOUR = 3600;
+	const DAY = 86400;
+	const WEEK = 604800;
+	
 	protected static $defaults = array(
 		'name' => null,
 		'value' => null,
-		'expiry' => 0,
+		'maxAge' => 0,
 		'path' => '',
 		'domain' => '',
 		'secure' => false,
@@ -24,23 +35,25 @@ class Cookie
 
 	/**
 	 * The Cookie constructor takes the same parameters as the setcookie function of PHP.
-	 * The only difference is that HttpOnly normally defaults to false, however this has been
-	 * changed to true for security purposes.
+	 * The only differences are that HttpOnly normally defaults to false, however this has been
+	 * changed to true for security purposes, and Max-Age is used instead of Expires, meaning it
+	 * only takes the number of seconds until expiry.
 	 *
 	 * @param string $name
 	 * @param mixed $value
+	 * @param int $maxAge
 	 * @param string $path
 	 * @param string $domain
 	 * @param boolean $secure
 	 * @param boolean $httponly 
 	 */
-	public function __construct($name, $value, $expiry = 0, $path = '', $domain = '', $secure = false, $httponly = true)
+	public function __construct($name, $value, $maxAge = 0, $path = '', $domain = '', $secure = false, $httponly = true)
 	{
 		$this->name = $name;
 		$this->value = $value;
-		$this->expiry = $expiry;
+		$this->maxAge = $maxAge;
 		$this->path = $path;
-		$this->domain = ($domain === null) ? $_SERVER['HTTP_HOST'] : $domain;
+		$this->domain = $domain;
 		$this->secure = $secure;
 		$this->httponly = $httponly;
 	}
@@ -53,6 +66,9 @@ class Cookie
 	 */
 	public static function get($name)
 	{
+		if (!isset($_COOKIE[$name])) {
+			return false;
+		}
 		$config = array_merge(static::$defaults, \unserialize(\urldecode($_COOKIE[$name])));
 		$config['name'] = $name;
 		$ref = new \ReflectionClass(\get_class());
@@ -65,15 +81,18 @@ class Cookie
 	 */
 	public function save()
 	{
-		$data = \get_object_vars($this);
-		unset($data['name']);
-		foreach ($data as $key => $value) {
-			if(static::$defaults[$key] === $value) {
-				unset($data[$key]);
-			}
+		if($this->changed && $this->saved) {
+			$this->delete();
 		}
+		$data = array(
+			'value' => $this->value,
+			'domain' => $this->domain,
+			'path' => $this->path
+		);
 		$data = \urlencode(\serialize($data));
-		setcookie($this->name, $data, $this->expiry, $this->path, $this->domain, $this->secure, $this->httponly);
+		setcookie($this->name, $data, time() + $this->maxAge, $this->path, $this->domain, $this->secure, $this->httponly);
+		$this->saved = true;
+		$this->changed = false;
 	}
 	
 	public function delete()
@@ -82,76 +101,28 @@ class Cookie
 		unset($_COOKIE[$this->name]);
 	}
 	
-	public function getName() 	{
+	public function name() 	{
 		return $this->name;
 	}
 
-	public function setName($name)
+	public function value($value = null)
 	{
-		$this->name = $name;
-	}
-
-	public function getValue()
-	{
-		return $this->value;
-	}
-
-	public function setValue($value)
-	{
-		$this->value = $value;
-	}
-
-	public function getPath()
-	{
-		return $this->path;
-	}
-
-	public function setPath($path)
-	{
-		$this->path = $path;
-	}
-
-	public function getDomain()
-	{
-		return $this->domain;
-	}
-
-	public function setDomain($domain)
-	{
-		$this->domain = $domain;
-	}
-
-	public function isSecure()
-	{
-		return $this->secure;
-	}
-
-	public function setSecure($secure)
-	{
-		$this->secure = $secure;
-	}
-
-	public function getHttpOnly()
-	{
-		return $this->httponly;
-	}
-
-	public function setHttpOnly($httponly)
-	{
-		$this->httponly = $httponly;
+		if($value === null) {
+			return $this->value;
+		} else {
+			$this->value = $value;
+			$this->changed = true;
+		}
 	}
 	
 	public function __sleep()
 	{
-		$fields = array('name', 'value');
+		$fields = array('value');
 		if($this->path !== '') {
 			$fields[] = 'path';
 		}
 		if($this->domain !== '') {
 			$fields[] = 'domain';
-		}
-		if($this->expiry !== 0) {
-			$fields[] = 'expiry';
 		}
 		return $fields;
 	}
@@ -163,9 +134,6 @@ class Cookie
 		}
 		if($this->domain === null) {
 			$this->domain = '';
-		}
-		if($this->expiry === null) {
-			$this->expiry = 0;
 		}
 	}
 
