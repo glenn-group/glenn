@@ -13,10 +13,6 @@ class Cookie
 	private $secure;
 	private $httponly;
 	
-	/** Variables for internal logic **/
-	private $changed = false;
-	private $saved = false;
-	
 	/** Constants for cookie max age **/
 	const MINUTE = 60;
 	const HOUR = 3600;
@@ -81,9 +77,6 @@ class Cookie
 	 */
 	public function save()
 	{
-		if($this->changed && $this->saved) {
-			$this->delete();
-		}
 		$data = array(
 			'value' => $this->value,
 			'domain' => $this->domain,
@@ -91,27 +84,38 @@ class Cookie
 		);
 		$data = \urlencode(\serialize($data));
 		setcookie($this->name, $data, time() + $this->maxAge, $this->path, $this->domain, $this->secure, $this->httponly);
-		$this->saved = true;
-		$this->changed = false;
 	}
 	
+	/**
+	 * Remove this cookie from the user's computer.
+	 */
 	public function delete()
 	{
 		setcookie($this->name, '', time() - 3600*25, $this->path, $this->domain);
 		unset($_COOKIE[$this->name]);
 	}
 	
+	/**
+	 * Return the name of this cookie.
+	 * 
+	 * @return string
+	 */
 	public function name() 	{
 		return $this->name;
 	}
 
+	/**
+	 * If no parameter is given, the current value is returned. Otherwise the value is changed.
+	 *
+	 * @param mixed $value
+	 * @return mixed 
+	 */
 	public function value($value = null)
 	{
 		if($value === null) {
 			return $this->value;
 		} else {
 			$this->value = $value;
-			$this->changed = true;
 		}
 	}
 
