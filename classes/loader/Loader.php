@@ -33,7 +33,7 @@ class Loader
 			}
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param string $class 
@@ -42,12 +42,17 @@ class Loader
 	{
 		if(\strpos($className, '_') === 0) {
 			$class = static::resolve(\substr($className, 1));
+			$parent = 'glenn'.  \substr($className, 1);
+			// Check if class is valid (interfaces not supported at this moment!)
+			if ($class !== $parent && !\is_subclass_of($class, $parent)) {
+				throw new \Exception("Class $class is not a subclass of $className.");
+			}
 		} else {
 			$class = $className;
 		}
 		foreach (self::$modules as $module => $path) {
 			if (\strpos($class, $module) === 0) {
-				require(
+				require_once(
 					$path.
 					self::$classPrefix.
 					\str_replace('\\', '/', \substr($class, \strlen($module))).
