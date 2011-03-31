@@ -114,27 +114,5 @@ class Cookie
 			$this->changed = true;
 		}
 	}
-	
-	public function __sleep()
-	{
-		$fields = array('value');
-		if($this->path !== '') {
-			$fields[] = 'path';
-		}
-		if($this->domain !== '') {
-			$fields[] = 'domain';
-		}
-		return $fields;
-	}
-	
-	public function __wakeup()
-	{
-		if($this->path === null) {
-			$this->path = '';
-		}
-		if($this->domain === null) {
-			$this->domain = '';
-		}
-	}
 
 }
