@@ -94,15 +94,7 @@ class Loader
 			if(isset($config->$class)) {
 				return $config->$class;
 			}
-			foreach (self::$modules as $module => $path) {
-				$fullPath = $path . self::$classPrefix .
-						\str_replace('\\', DIRECTORY_SEPARATOR, $class) .
-						self::$classSuffix;
-				if (\file_exists($fullPath)) {
-					return $module . $class;
-					//return $fullPath;
-				}
-			}
+			return 'glenn' . $class;
 		}
 		return false;
 	}
