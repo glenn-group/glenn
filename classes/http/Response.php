@@ -2,7 +2,7 @@
 
 namespace glenn\http;
 
-class Response extends Message
+class Response extends Message implements interfaces\Response
 {
 
     /**
@@ -108,7 +108,7 @@ class Response extends Message
      */
     public static function redirect($url, $status = 302)
     {
-        $response = new Response(null, $status);
+        $response = new static(null, $status);
         $response->addHeader('Location', $url);
         return $response;
     }

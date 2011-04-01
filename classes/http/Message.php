@@ -1,7 +1,7 @@
 <?php
 namespace glenn\http;
 
-class Message
+abstract class Message
 {
 	/**
 	 * @var array 

@@ -1,7 +1,7 @@
 <?php
 namespace glenn\http;
 
-class Request extends Message
+class Request extends Message implements interfaces\Request
 {
 	/**
 	 *
@@ -13,6 +13,8 @@ class Request extends Message
 	 * @var string
 	 */
     protected $method;
+	
+	private $cookies = array();
 	
 	/**
 	 * @var string
@@ -87,6 +89,18 @@ class Request extends Message
     {
         return $this->param($key, $filter, INPUT_POST);
     }
+	
+	public function cookie($name)
+	{
+		if (\array_key_exists($name, $this->cookies)) {
+			return $this->cookies[$name];
+		} else if (isset($_COOKIE[$name])) {
+			$this->cookies[$name] = Cookie::get($name);
+			return $this->cookies[$name];
+		} else {
+			return false;
+		}
+	}
     
     /**
 	 * Filters request parameters using native PHP filters. If no key is 

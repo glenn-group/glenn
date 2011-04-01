@@ -2,7 +2,7 @@
 
 namespace glenn\router;
 
-use glenn\http\Request;
+use glenn\http\interfaces\Request;
 
 /** Router using tree-based routing.
  */
@@ -40,7 +40,7 @@ class RouterTree extends Router {
 	 * 	@return array Array with indices 'controller' and 'action'.
 	 * 	@throws Exception If no route found.
 	 */
-	public function resolveRoute(Request $request) {
+	public function route(Request $request) {
 		// Use offset
 		$offset_length = strlen($this->url_offset);
 		$request_uri = substr($request->uri(), $offset_length);

@@ -1,10 +1,11 @@
 <?php
 namespace glenn\controller;
 
-use glenn\http\Request,
-	glenn\http\Response,
+use glenn\http\interfaces\Request,
+	glenn\http\interfaces\Response as IResponse,
 	glenn\router\Router,
-	glenn\view\View;
+	_\view\View,
+	glenn\http\Response;
 
 class FrontController implements Dispatcher
 {
@@ -17,16 +18,18 @@ class FrontController implements Dispatcher
     
 	public function dispatch(Request $request)
 	{
-		$result = $this->router->resolveRoute($request);
+		$result = $this->router->route($request);
 		
 		$class = $this->className($result['controller']);
 		$method = $this->methodName($result['action']);
+		$action = \lcfirst($result['controller']) . '/' . $result['action'];
+		$view = new View($action);
 		$controller = new $class(
-			$request, new View(\lcfirst($result['controller']) . '/' . $result['action'])
+			$request, $view
 		);
 		
 		$result = $controller->{$method}();
-		if ($result instanceof Response) {
+		if ($result instanceof IResponse) {
 			return $result;
 		}
 		return new Response($controller->view()->render());
@@ -39,7 +42,7 @@ class FrontController implements Dispatcher
 	
 	private function className($controller) 
 	{
-		return 'app\\controller\\' . \ucfirst($controller) . 'Controller';
+		return 'app\controller\\' . \ucfirst($controller) . 'Controller';
 	}
 	
 	private function methodName($action)
