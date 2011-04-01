@@ -7,6 +7,10 @@ class Config
 	public static function factory($configFile)
 	{
 		$file = \glenn\loader\Loader::find('config', $configFile);
+		// If no such file is found, return a default implementation with no config values
+		if(!$file) {
+			return new adapter\PhpArray(array());
+		}
 		switch (pathinfo($configFile, PATHINFO_EXTENSION)) {
 			case 'php':				
 				include $file;
