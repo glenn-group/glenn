@@ -1,7 +1,6 @@
 <?php
 namespace glenn\controller;
 
-use glenn\controller\dispatcher\Dispatcher;
 use glenn\event\Event;
 use glenn\http\Request;
 use glenn\http\Response;
