@@ -29,17 +29,18 @@ class ClosureTree {
 		return $routes;
 	}
 	
-	public function add($config,$pattern = null,$name = null,$block = null){
+	public function add($pattern,$config = null,$name = null,$block = null){
 		
 		$manager = true;
 		$routes = array();
 		
+		if($config == null){
+			$config = $pattern;
+		}
+		
 		if (is_string($config)) {
 			$route = $this->stringToRoute($config);
 			$routes['get'] = $route;
-			if(!$pattern){
-				 $pattern = $route['action'];
-			}
 			if(!$name){
 				$name = ucfirst($route['action']);
 			}
