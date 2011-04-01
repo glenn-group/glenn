@@ -6,17 +6,17 @@ class Request extends Message
 	/**
 	 * @var string
 	 */
+	protected $uri;
+	
+	/**
+	 * @var string
+	 */
     protected $method;
 	
 	/**
 	 * @var array
 	 */
 	protected $params = array();
-	
-	/**
-	 * @var string
-	 */
-	protected $uri;
 	
 	/**
 	 * @param string $uri
@@ -42,6 +42,14 @@ class Request extends Message
 	/**
 	 * @return string
 	 */
+	public function uri()
+	{
+		return $this->uri;
+	}
+	
+	/**
+	 * @return string
+	 */
 	public function method()
 	{
 		return $this->method;
@@ -50,8 +58,11 @@ class Request extends Message
 	/**
 	 * @return string
 	 */
-	public function uri()
+	public function hostname()
 	{
+		if (\strpos($this->uri, 'http://') === 0) {
+			return \substr($this->uri, 0, 7);
+		}
 		return $this->uri;
 	}
 	
@@ -122,7 +133,8 @@ class Request extends Message
 	/**
 	 * @return string
 	 */
-    public function __toString() {
+    public function __toString() 
+	{
         
     }
 }

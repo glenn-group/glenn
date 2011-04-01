@@ -6,19 +6,19 @@ class View
 	/**
 	 * @var string
 	 */
-	private $template;
+	protected $template;
 
 	/**
 	 * @var array
 	 */
-	private $variables = array();
+	protected $variables = array();
 	
 	/**
 	 * @param  string $template
 	 * @param  array  $params
 	 * @return View 
 	 */
-	public static function factory($template, array $params)
+	public static function factory($template = null, array $params = array())
 	{
 		return new View($template, $params);
 	}
@@ -47,7 +47,7 @@ class View
 			ob_end_clean();
 			return $output;
 		} else {
-			throw new \InvalidArgumentException("View file '$file' could not be located.");
+			throw new \Exception("View file '$file' could not be located.");
 		}
 	}
 
@@ -64,10 +64,5 @@ class View
 	public function __set($name, $value)
 	{
 		$this->set($name, $value);
-	}
-
-	public function __tostring()
-	{
-		return $this->render();
 	}
 }

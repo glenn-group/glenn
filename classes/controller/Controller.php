@@ -1,6 +1,7 @@
 <?php
 namespace glenn\controller;
 
+use glenn\controller\dispatcher\Dispatcher;
 use glenn\event\Event;
 use glenn\http\Request;
 use glenn\http\Response;
@@ -9,23 +10,18 @@ use glenn\view\View;
 abstract class Controller
 {
 	/**
-	 * Registered after filters
+	 * After filters
 	 * 
 	 * @var array
 	 */
 	protected $after = array();
 	
 	/**
-	 * Registered before filters
+	 * Before filters
 	 * 
 	 * @var array
 	 */
 	protected $before = array();
-	
-	/**
-	 * @var Dispatcher
-	 */
-    protected $dispatcher;
     
 	/**
 	 * @var Request
@@ -44,16 +40,15 @@ abstract class Controller
     
 	/**
 	 * @param  string     $class
-	 * @param  Dispatcher $dispatcher
 	 * @param  Request    $request
 	 * @return Controller
 	 */
-    public static function factory($class, Dispatcher $dispatcher, Request $request)
+    public static function factory($class, Request $request)
     {
 		if (!class_exists($class)) {
 			throw new \Exception("Class $class does not exist");
 		}
-		$controller = new $class($dispatcher, $request);
+		$controller = new $class($request);
 		if (!$controller instanceof self) {
 			throw new \Exception("Class $class not instance of Controller");
 		}
@@ -61,52 +56,31 @@ abstract class Controller
     }
     
 	/**
-	 * @param Dispatcher $dispatcher
-	 * @param Request    $request
+	 * @param Request request
 	 */
-    public function __construct(Dispatcher $dispatcher, Request $request)
+    public function __construct(Request $request)
     {
-        //$this->dispatcher = $dispatcher;
-        $this->request    = $request;
-		//$this->view       = new View();
+		// Set the request for this dispatch cycle
+        $this->request = $request;
 		
-		/*
-		// Trigger before filters
-		foreach ($this->before as $before) {
-			$this->dispatcher()->events()->bind(
-				'glenn.dispatching.before', function(Event $e) use($before) {
-					return \call_user_func(array($e->subject(), $before));
-				}
-			);
-		}
+		// Create a view with some sane defaults
+		$this->view = new View(
+			$request->controller . '/' . $request->action
+		);
 		
-		// Automagically create a response from the controller's view object
-		$this->dispatcher()->events()->bind('glenn.dispatching.after', function(Event $e) {
-			$e->subject()->view()->setTemplate(
-				$e->subject()->request()->controller . '/' .
-				$e->subject()->request()->action
-			);
-			$e->subject()->setResponse(new Response($e->subject()->view()));
+		// Bind filters to be triggered before dispatch
+		$this->bindFilters($this->before, 'glenn.dispatch.before');
+		
+		// Automagically set a response after dispatch
+		Dispatcher::events()->bind('glenn.dispatch.after', function(Event $e) {
+			if ($e->subject()->response() === null) {
+				$e->subject()->setResponse();
+			}
 		});
 		
-		// Trigger after filters
-		foreach ($this->after as $after) {
-			$this->dispatcher()->events()->bind(
-				'glenn.dispatching.after', function(Event $e) use($after) {
-					return \call_user_func(array($e->subject(), $after));
-				}
-			);
-		}
-		 */
+		// Bind filters to be triggered after dispatch
+		$this->bindFilters($this->after, 'glenn.dispatch.after');
     }
-	
-	/**
-	 * @return Dispatcher
-	 */
-	public function dispatcher()
-	{
-		return $this->dispatcher;
-	}
 	
 	/**
 	 * @return Request
@@ -127,8 +101,11 @@ abstract class Controller
 	/**
 	 * @param Response $response 
 	 */
-	public function setResponse(Response $response)
+	public function setResponse(Response $response = null)
 	{
+		if ($response === null) {
+			$response = new Response($this->view->render());
+		}
 		$this->response = $response;
 	}
 	
@@ -146,5 +123,29 @@ abstract class Controller
 	public function setView(View $view)
 	{
 		$this->view = $view;
+	}
+	
+	/**
+	 * Bind filters on the dispatcher's current EventHandler. A filter is 
+	 * simply a public method on the subject controller of the event.
+	 * 
+	 * @param array  $filters Array of filters to be bound
+	 * @param string $event   Event to bind filters to
+	 */
+	protected function bindFilters($filters, $event)
+	{
+		foreach ($filters as $key => $value) {
+			if (\is_array($value)) {
+				if (!\in_array($this->request->action, $value)) {
+					continue;
+				}
+				$filter = $key;
+			} else {
+				$filter = $value;
+			}			
+			Dispatcher::events()->bind($event, function(Event $e) use($filter) {
+				return \call_user_func(array($e->subject(), $filter));
+			});
+		}
 	}
 }
