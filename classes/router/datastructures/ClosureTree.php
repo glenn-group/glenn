@@ -34,7 +34,6 @@ class ClosureTree {
 		$manager = true;
 		$routes = array();
 		
-		
 		if (is_string($config)) {
 			$route = $this->stringToRoute($config);
 			$routes['get'] = $route;
@@ -45,7 +44,6 @@ class ClosureTree {
 				$name = ucfirst($route['action']);
 			}
 		}
-	
 
 		if (is_array($config)) {
 			$routes = array_merge($routes,$this->arrayToRoute($config, $manager));
