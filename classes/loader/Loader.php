@@ -26,8 +26,7 @@ class Loader
 	 */
 	public static function bootstrapModules()
 	{
-		$modules = \array_reverse(self::$modules);
-		foreach ($modules as $module => $path) {
+		foreach (self::$modules as $module => $path) {
 			$bootstrap = $path.'bootstrap.php';
 			if (\file_exists($bootstrap)) {
 				require($bootstrap);
@@ -59,16 +58,37 @@ class Loader
 					\str_replace('\\', '/', \substr($class, \strlen($module))).
 					self::$classSuffix
 				);
-				break;
+				if($class !== $className) {
+					\class_alias($class, $className);
+				}
+				return;
 			}
 		}
 	}
 	
 	/**
+	 * Locate a view file as high up as possible in the list of modules.
 	 *
-	 * @return array
+	 * @param string $view 
+	 * @return string path to view
 	 */
-	public static function modules()
+	public static function find($type, $file)
+	{
+		$filePath = $type . DIRECTORY_SEPARATOR . $file;
+		foreach (self::$modules as $module => $path) {
+			if (\file_exists($path . $filePath)) {
+				return $path . $filePath;
+			}
+		}
+	}
+	
+	/**
+	 * Locate a class as high up as possible in the list of modules.
+	 *
+	 * @param string $view 
+	 * @return string path to view
+	 */
+	public static function resolve($class)
 	{
 		if(\substr($class, 0, 1) !== '\\') {
 			// Absolute path
