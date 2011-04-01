@@ -99,6 +99,10 @@ class RouterTree extends Router {
 
 		return $trace;
 	}
+	
+	public function addClosure() {
+		
+	}
 
 	/** Extract segments from URI
 	 * 	@param string $uri URI where each segment is separated with /

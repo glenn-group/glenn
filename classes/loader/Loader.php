@@ -26,12 +26,18 @@ class Loader
 	 */
 	public static function bootstrapModules()
 	{
-		foreach (self::$modules as $module => $path) {
+		$modules = \array_reverse(self::$modules);
+		foreach ($modules as $module => $path) {
 			$bootstrap = $path.'bootstrap.php';
 			if (\file_exists($bootstrap)) {
 				require($bootstrap);
 			}
 		}
+	}
+	
+	public static function isRegistered($module)
+	{
+		return \array_key_exists($module, self::$modules);
 	}
 	
 	/**
@@ -53,58 +59,18 @@ class Loader
 					\str_replace('\\', '/', \substr($class, \strlen($module))).
 					self::$classSuffix
 				);
-				if($class !== $className) {
-					\class_alias($class, $className);
-				}
-				return;
+				break;
 			}
 		}
 	}
 	
 	/**
-	 * Locate a view file as high up as possible in the list of modules.
 	 *
-	 * @param string $view 
-	 * @return string path to view
+	 * @return array
 	 */
-	public static function find($type, $file)
+	public static function modules()
 	{
-		$filePath = $type . DIRECTORY_SEPARATOR . $file;
-		foreach (self::$modules as $module => $path) {
-			if (\file_exists($path . $filePath)) {
-				return $path . $filePath;
-			}
-		}
-	}
-	
-	/**
-	 * Locate a class as high up as possible in the list of modules.
-	 *
-	 * @param string $view 
-	 * @return string path to view
-	 */
-	public static function resolve($class)
-	{
-		if(\substr($class, 0, 1) !== '\\') {
-			// Absolute path
-			return $class;
-		} else {
-			// Relative path, search through modules
-			$config = \glenn\config\Config::factory('classes.php');
-			if(isset($config->$class)) {
-				return $config->$class;
-			}
-			foreach (self::$modules as $module => $path) {
-				$fullPath = $path . self::$classPrefix .
-						\str_replace('\\', DIRECTORY_SEPARATOR, $class) .
-						self::$classSuffix;
-				if (\file_exists($fullPath)) {
-					return $module . $class;
-					//return $fullPath;
-				}
-			}
-		}
-		return false;
+		return self::$modules;
 	}
 	
 	/**
