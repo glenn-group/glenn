@@ -14,6 +14,16 @@ class Request extends Message
     protected $method;
 	
 	/**
+	 * @var string
+	 */
+    protected $ajax;
+	
+	/**
+	 * @var string
+	 */
+    protected $secure;
+	
+	/**
 	 * @var array
 	 */
 	protected $params = array();
@@ -36,6 +46,21 @@ class Request extends Message
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
         
+		if (\strpos($this->uri, 'https://') === 0) {
+			$this->secure = true;
+		} else {
+			$this->secure = false;
+		}
+		
+		// Check if this request is an AJAX request
+		if ( (\strpos($this->uri, 'https://') === 0 || \strpos($this->uri, 'http://') === 0)
+				&& isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+				&& \strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+			$this->ajax = true;
+		} else {
+			$this->ajax = false;
+		}
+		
         $this->addHeader('Host', $this->hostname());
     }
 	
@@ -53,6 +78,24 @@ class Request extends Message
 	public function method()
 	{
 		return $this->method;
+	}
+	
+	/**
+	 *
+	 * @return boolean
+	 */
+	public function isAjax()
+	{
+		return $this->ajax;
+	}
+	
+	/**
+	 *
+	 * @return boolean
+	 */
+	public function isSecure()
+	{
+		return $this->secure;
 	}
 	
 	/**
