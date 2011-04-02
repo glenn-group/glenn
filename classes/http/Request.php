@@ -62,6 +62,8 @@ class Request extends Message
 	{
 		if (\strpos($this->uri, 'http://') === 0) {
 			return \substr($this->uri, 7, \strpos($this->uri(), '/', 7) - 7);
+		} else if (\strpos($this->uri, 'https://') === 0) {
+			return \substr($this->uri, 8, \strpos($this->uri(), '/', 8) - 8);
 		}
 		return $this->uri;
 	}

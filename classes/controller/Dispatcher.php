@@ -67,13 +67,21 @@ class Dispatcher
 	protected function dispatchExternal($request)
 	{
 		// Open up a socket to the host
-		$fp = \fsockopen($request->hostname(), 80);
+		if (\strpos($request->uri(), 'http://') === 0) {
+			$fp = \fsockopen($request->hostname(), 80);
+		} else {
+			$fp = \fsockopen('ssl://'.$request->hostname(), 443);
+		}
+		
+		if (!$fp) {
+			throw new Exception('Connection could not be established with ' . $request->uri());
+		}
 		
 		// Make sure the connection is not kept alive
 		$request->addHeader('Connection', 'Close');
 		
 		// Write request to socket
-		\fwrite($fp, $request->__toString());
+		\fwrite($fp, $request);
 		
 		// Read response from and close socket
 		$response = '';
@@ -81,7 +89,7 @@ class Dispatcher
 			$response .= \fgets($fp);
 		}
 		\fclose($fp);
-		
+
 		// Return response object created from response string
 		return Response::fromString($response);
 	}
@@ -144,7 +152,7 @@ class Dispatcher
 	
 	protected function isExternal($request)
 	{
-		return \strpos($request->uri(), 'http://') === 0;
+		return \strpos($request->uri(), 'http://') === 0 || \strpos($request->uri(), 'https://') === 0;
 	}
 	
 	protected function pushEventHandler()
