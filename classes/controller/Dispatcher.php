@@ -13,19 +13,19 @@ class Dispatcher
 	 * 
 	 * @var string
 	 */
-	protected static $actionSuffix = 'Action';
+	protected $actionSuffix = 'Action';
 	
 	/**
 	 * Suffix for controller classes
 	 * 
 	 * @var string
 	 */
-	protected static $controllerSuffix = 'Controller';
+	protected $controllerSuffix = 'Controller';
 	
 	/**
 	 * Stack of EventHandlers
 	 */
-	protected static $events = array();
+	protected $events = array();
 	
 	/**
 	 * Dispatch a request
@@ -33,19 +33,19 @@ class Dispatcher
 	 * @param  Request  $request 
 	 * @return Response
 	 */
-	public static function dispatch(Request $request)
+	public function dispatch(Request $request)
 	{
 		// Push a new EventHandler to the top of the stack
-		static::pushEventHandler();
+		$this->pushEventHandler();
 		
-		if (static::isExternal($request)) {
-			$response = static::dispatchExternal($request);
+		if ($this->isExternal($request)) {
+			$response = $this->dispatchExternal($request);
 		} else {
-			$response = static::dispatchInternal($request);
+			$response = $this->dispatchInternal($request);
 		}
 		
 		// Pull EventHandler from the top of the stack
-		static::pullEventHandler();
+		$this->pullEventHandler();
 		
 		return $response;
 	}
@@ -53,9 +53,9 @@ class Dispatcher
 	/**
 	 * Retrieve active EventHandler
 	 */
-	public static function events()
+	public function events()
 	{
-		return static::$events[\count(static::$events) - 1];
+		return $this->events[\count($this->events) - 1];
 	}
 	
 	/**
@@ -64,43 +64,26 @@ class Dispatcher
 	 * @param  Request  $request 
 	 * @return Response
 	 */
-	protected static function dispatchExternal($request)
+	protected function dispatchExternal($request)
 	{
-		// Open up a socket connection to the host
-		$fp = \fsockopen('www.google.com', 80);
+		// Open up a socket to the host
+		$fp = \fsockopen($request->hostname(), 80);
 		
-		$out = "GET / HTTP/1.1\r\n";
-		$out.= "Host: www.google.com\r\n";
-		$out.= "Connection: Close\r\n\r\n";
-		\fwrite($fp, $out);
+		// Make sure the connection is not kept alive
+		$request->addHeader('Connection', 'Close');
 		
+		// Write request to socket
+		\fwrite($fp, $request->__toString());
 		
+		// Read response from and close socket
+		$response = '';
 		while (!\feof($fp)) {
-			echo \fgets($fp);
-			echo '<br/>';
+			$response .= \fgets($fp);
 		}
-		
-		// Close socket connection before returning
 		\fclose($fp);
 		
-		exit;
-		/*
-		$body = \file_get_contents($request->uri());
-		
-		foreach ($http_response_header as $header) {
-			if (\strpos($header, 'HTTP') === 0) {
-				$status   = \substr($header, \strpos($header, ' ') + 1, 3);
-				$response = new Response($body, $status);
-				continue;
-			}
-			$response->addHeader(
-				\substr($header, 0, \strpos($header, ':')), 
-				\substr($header, \strpos($header, ':') + 1)
-			);
-		}
-		
-		return $response;
-		*/
+		// Return response object created from response string
+		return Response::fromString($response);
 	}
 	
 	/**
@@ -109,16 +92,16 @@ class Dispatcher
 	 * @param  Request  $request 
 	 * @return Response
 	 */
-	protected static function dispatchInternal($request)
+	protected function dispatchInternal($request)
 	{
 		// Instantiate action controller
 		$controller = Controller::factory(
-			static::formatControllerName($request->controller), $request
+			$this->formatControllerName($request->controller), $request
 		);
 		
 		// Trigger dispatch before event
-		$responses = static::triggerUntilResponse(
-			static::events(), new Event($controller, 'glenn.dispatch.before')
+		$responses = $this->triggerUntilResponse(
+			$this->events(), new Event($controller, 'glenn.dispatch.before')
 		);
 		if (\count($responses) > 0) {
 			return $responses[0];
@@ -126,15 +109,15 @@ class Dispatcher
 		
 		// Execute controller action
 		$response = \call_user_func(array(
-			$controller, static::formatActionName($request->action)
+			$controller, $this->formatActionName($request->action)
 		));
 		if ($response instanceof Response) {
 			return $response;
 		}
 		
 		// Trigger dispatch after event
-		$responses = static::triggerUntilResponse(
-			static::events(), new Event($controller, 'glenn.dispatch.after')
+		$responses = $this->triggerUntilResponse(
+			$this->events(), new Event($controller, 'glenn.dispatch.after')
 		);
 		if (\count($responses) > 0) {
 			return $responses[0];
@@ -149,32 +132,32 @@ class Dispatcher
 		throw new \Exception('No response returned');
 	}
 	
-	protected static function formatControllerName($unformatted)
+	protected function formatControllerName($unformatted)
 	{
-		return 'app\\controller\\' . \ucfirst($unformatted) . static::$controllerSuffix;
+		return 'app\\controller\\' . \ucfirst($unformatted) . $this->controllerSuffix;
 	}
 	
-	protected static function formatActionName($unformatted)
+	protected function formatActionName($unformatted)
 	{
-		return \lcfirst($unformatted) . static::$actionSuffix;
+		return \lcfirst($unformatted) . $this->actionSuffix;
 	}
 	
-	protected static function isExternal($request)
+	protected function isExternal($request)
 	{
 		return \strpos($request->uri(), 'http://') === 0;
 	}
 	
-	protected static function pushEventHandler()
+	protected function pushEventHandler()
 	{
-		\array_push(static::$events, new EventHandler());
+		\array_push($this->events, new EventHandler());
 	}
 	
-	protected static function pullEventHandler()
+	protected function pullEventHandler()
 	{
-		\array_pop(static::$events);
+		\array_pop($this->events);
 	}
 	
-	protected static function triggerUntilResponse(EventHandler $events, Event $event)
+	protected function triggerUntilResponse(EventHandler $events, Event $event)
 	{
 		return $events->triggerUntil(
 			$event,

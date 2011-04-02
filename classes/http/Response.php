@@ -56,32 +56,57 @@ class Response extends Message
         504 => 'Gateway Time-out'
     );
 
-    /**
-     * @param  string $body
+	/**
+	 * Construct a new response object from a raw HTTP response string.
+	 * 
+     * @param  string   $string
      * @return Response
      */
-    public static function internalError($body, $status = 500)
+	public static function fromString($string)
+	{
+		$data = \explode("\r\n\r\n", $string);
+		foreach (\explode("\r\n", $data[0]) as $header) {
+			if (\strpos($header, 'HTTP') === 0) {
+				$status = \substr($header, \strpos($header, ' ') + 1, 3);
+			} else {
+				$headers[] = $header;
+			}
+		}
+		$response = new self($data[1], $status);
+		foreach($headers as $header) {
+			$response->addHeader(
+				\substr($header, 0, \strpos($header, ':')), 
+				\substr($header, \strpos($header, ':') + 1)
+			);
+		}
+		return $response;
+	}
+	
+    /**
+     * @param  string   $body
+     * @return Response
+     */
+    public static function internalError($body = null)
     {
-        return new self($body, $status);
+        return new self($body, 500);
     }
 	
 	/**
-     * @param  string $body
+     * @param  string   $body
      * @return Response
      */
-    public static function notFound($body, $status = 404)
+    public static function notFound($body = null)
     {
-        return new self($body, $status);
+        return new self($body, 404);
     }
     
     /**
+	 * @param  string   $uri
      * @return Response
      */
-    public static function redirect($url, $status = 302)
+    public static function redirect($url)
     {
-        return new self(null, $status, array(
-            'Location' => $url
-        ));
+        return new self(null, 302, array('Location' => $url));
     }
     
     /**
@@ -125,9 +150,19 @@ class Response extends Message
 	}
 
     /**
-     * 
+     * @return string
      */
-    public function __toString() {
-        
+    public function __toString() 
+	{
+        $response = \sprintf(
+            "%s %s %s\r\n", 
+            $this->protocol, 
+            $this->status, 
+            $this->statuses[$this->status]
+        );
+		foreach ($this->headers as $key => $value) {
+			$response .= \sprintf("%s: %s\r\n", $key, $value);
+		}
+		return $response .= "\r\n" . $this->body;
     }
 }

@@ -36,7 +36,7 @@ class Request extends Message
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
         
-        $this->headers = $headers;
+        $this->addHeader('Host', $this->hostname());
     }
 	
 	/**
@@ -61,7 +61,7 @@ class Request extends Message
 	public function hostname()
 	{
 		if (\strpos($this->uri, 'http://') === 0) {
-			return \substr($this->uri, 0, 7);
+			return \substr($this->uri, 7, \strpos($this->uri(), '/', 7) - 7);
 		}
 		return $this->uri;
 	}
@@ -72,10 +72,10 @@ class Request extends Message
 	 * 
 	 * @return array|string
 	 */
-    public function get($key = null, $filter = true)
+    /*public function get($key = null, $filter = true)
     {
         return $this->param($key, $filter, INPUT_GET);
-    }
+    }*/
     
     /**
 	 * Returns POST parameter $key. If no key is specified, the full POST 
@@ -83,10 +83,10 @@ class Request extends Message
 	 * 
 	 * @return array|string
 	 */
-    public function post($key = null, $filter = true)
+    /*public function post($key = null, $filter = true)
     {
         return $this->param($key, $filter, INPUT_POST);
-    }
+    }*/
     
     /**
 	 * Filters request parameters using native PHP filters. If no key is 
@@ -94,7 +94,7 @@ class Request extends Message
 	 * 
 	 * @return array|string
 	 */
-    protected function paramram($key, $filter, $type)
+    /*protected function paramram($key, $filter, $type)
 	{
         if ($key === null || $key === true) {
             return filter_input_array($type, FILTER_SANITIZE_STRING) ?: array();
@@ -105,7 +105,7 @@ class Request extends Message
         } else {
             return filter_input($type, $key, FILTER_UNSAFE_RAW);
         }
-    }
+    }*/
 	
 	public function param($key)
 	{
@@ -135,6 +135,15 @@ class Request extends Message
 	 */
     public function __toString() 
 	{
-        
-    }
+		$request = \sprintf(
+			"%s %s %s\r\n",
+			$this->method, 
+			$this->uri,
+			$this->protocol
+		);
+		foreach ($this->headers as $key => $value) {
+			$request .= \sprintf("%s: %s\r\n", $key, $value);
+		}
+		return $request .= "\r\n";
+	}
 }
