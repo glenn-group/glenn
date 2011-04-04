@@ -14,6 +14,11 @@ class RouterTree extends Router {
 	/** 	Specified offset for URL
 	 */
 	private $url_offset;
+	/**
+	 * Index for reverse routing based on names
+	 * @var Array Array with name patterns
+	 */
+	private $nameIndex = array();
 
 	/**
 	 * Creates an default route
@@ -45,7 +50,7 @@ class RouterTree extends Router {
 		$offset_length = strlen($this->url_offset);
 		$request_uri = substr($request->uri(), $offset_length);
 		$method = strtolower($request->method());
-		
+
 		// Store information retrived while traversing the tree
 		$trace = array();
 
@@ -102,7 +107,7 @@ class RouterTree extends Router {
 
 		return $trace;
 	}
-	
+
 	public function addClosure() {
 		
 	}
@@ -122,7 +127,34 @@ class RouterTree extends Router {
 	 * 	@param array $routes Array with routes, compatible with Tree->toArray().
 	 */
 	public function addRoutes(array $routes) {
+		$this->createNameIndex($routes);
 		$this->tree = $routes;
+
+		// Test reverse
+		//var_dump($this->url('Blog/datum/title', '2010-12-12', 'hejsna'));
+	}
+
+	// Just an example for debug/test
+	private function url($namePath) {
+		$args = \func_get_args();
+		unset($args[0]);
+		$pattern = $this->nameIndex[$namePath];
+
+		foreach ($args as $arg) {
+			$start = \strpos($pattern, '<');
+			$end = \strpos($pattern, '>', $start + 1) + 1;
+			$head = \substr($pattern, 0, $start);
+			$tail = \substr($pattern, $end);
+
+			$pattern = $head . $arg . $tail;
+		}
+
+		return $pattern;
+	}
+
+	private function createNameIndex($routes) {
+		$trav = new \glenn\router\datastructures\TreeIndexer();
+		$this->nameIndex = $trav->buildNameIndex($routes);
 	}
 
 	/** Unsupported, add all routes at once instead using addRoutes.

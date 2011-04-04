@@ -53,7 +53,7 @@ class ClosureTree {
 		$routes = array_merge($routes,array('name' => $name,'pattern' => $pattern));
 		
 		// Check if node is a entry or manager
-		if ($pattern[0] == '<' && $len = $pattern[strlen($pattern) - 1] == '>') {
+		if (!empty($pattern) && $pattern[0] == '<' && $len = $pattern[strlen($pattern) - 1] == '>') {
 			$manager = false;
 			$pattern = substr($pattern, 1, $len);
 		}
