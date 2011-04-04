@@ -86,6 +86,9 @@ class RouterTree extends Router {
 			} else if (isset($arrayRef['children']['*'])) {
 				$arrayRef = &$arrayRef['children']['*'];
 				$trace['nodes'][] = $arrayRef['name'];
+			} else {
+				// No match
+				throw new \Exception('404');
 			}
 
 			// Overwrite controller and action if found
