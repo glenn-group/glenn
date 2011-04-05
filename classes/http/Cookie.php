@@ -2,6 +2,9 @@
 
 namespace glenn\http;
 
+/**
+ * Class for managing HTTP cookies in an object oriented manner.
+ */
 class Cookie
 {
 	/** Cookie data **/
@@ -105,18 +108,29 @@ class Cookie
 	}
 
 	/**
-	 * If no parameter is given, the current value is returned. Otherwise the value is changed.
+	 * Return the value of the cookie. By default the value is sanitized but this can be overridden
+	 * using the parameter.
 	 *
-	 * @param mixed $value
+	 * @param boolean $filter
 	 * @return mixed 
 	 */
-	public function value($value = null)
+	public function value($filter = true)
 	{
-		if($value === null) {
-			return $this->value;
+		if ($filter === true) {
+			return filter_var($this->value, FILTER_SANITIZE_STRING);
 		} else {
-			$this->value = $value;
+			return $this->value;
 		}
+	}
+	
+	/**
+	 * Set the value of this cookie instance.
+	 *
+	 * @param mixed $value 
+	 */
+	public function setValue($value)
+	{
+		$this->value = $value;
 	}
 
 }
