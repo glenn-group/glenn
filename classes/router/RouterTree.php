@@ -4,14 +4,18 @@ namespace glenn\router;
 
 use glenn\http\interfaces\Request;
 
-/** Router using tree-based routing.
+/**
+ * Router using tree-based routing.
  */
-class RouterTree extends Router {
+class RouterTree extends Router
+{
 
-	/** Structure containing routes
+	/**
+	 * Structure containing routes
 	 */
 	private $tree;
-	/** 	Specified offset for URL
+	/**
+	 * Specified offset for URL
 	 */
 	private $url_offset;
 	/**
@@ -24,7 +28,8 @@ class RouterTree extends Router {
 	 * Creates an default route
 	 * @param string $url_offset Offset for url
 	 */
-	public function __construct($url_offset = '') {
+	public function __construct($url_offset = '')
+	{
 		$this->url_offset = $url_offset;
 
 		// Default pattern
@@ -40,12 +45,14 @@ class RouterTree extends Router {
 		parent::__construct();
 	}
 
-	/** Find a matching route
-	 * 	@param string $request_uri The URI used to accecss webpage ($_SERVER['REQUEST_URI'])
-	 * 	@return array Array with indices 'controller' and 'action'.
-	 * 	@throws Exception If no route found.
+	/**
+	 * Find a matching route
+	 * @param string $request_uri The URI used to accecss webpage ($_SERVER['REQUEST_URI'])
+	 * @return array Array with indices 'controller' and 'action'.
+	 * @throws Exception If no route found.
 	 */
-	public function route(Request $request) {
+	public function route(Request $request)
+	{
 		// Use offset
 		$offset_length = strlen($this->url_offset);
 		$request_uri = substr($request->uri(), $offset_length);
@@ -68,7 +75,7 @@ class RouterTree extends Router {
 		} else if (isset($arrayRef['*'])) { // Wildcard exist
 			$arrayRef = &$arrayRef['*'];
 		} else { // No found
-			throw new \Exception('404');
+			throw new \Exception('No route found for URI ' . $request_uri);
 		}
 
 		$trace['nodes'][] = $arrayRef['name'];
@@ -93,7 +100,7 @@ class RouterTree extends Router {
 				$trace['nodes'][] = $arrayRef['name'];
 			} else {
 				// No match
-				throw new \Exception('404');
+				throw new \Exception('No route found for URI ' . $request_uri);
 			}
 
 			// Overwrite controller and action if found
@@ -108,25 +115,25 @@ class RouterTree extends Router {
 		return $trace;
 	}
 
-	public function addClosure() {
-		
-	}
-
-	/** Extract segments from URI
-	 * 	@param string $uri URI where each segment is separated with /
-	 * 	@return array Array where each element correspond to an segment of URI.
+	/**
+	 * Extract segments from URI
+	 * @param string $uri URI where each segment is separated with /
+	 * @return array Array where each element correspond to an segment of URI.
 	 */
-	private function uriToArray($uri) {
+	private function uriToArray($uri)
+	{
 		$uri = mb_substr($uri, 1);
 		$uri_array = explode('/', $uri);
 
 		return $uri_array;
 	}
 
-	/** Add routes to be used by resolveRoute.
-	 * 	@param array $routes Array with routes, compatible with Tree->toArray().
+	/**
+	 * Add routes to be used by resolveRoute.
+	 * @param array $routes Array with routes, compatible with Tree->toArray().
 	 */
-	public function addRoutes(array $routes) {
+	public function addRoutes(array $routes)
+	{
 		$this->createNameIndex($routes);
 		$this->tree = $routes;
 
@@ -135,7 +142,8 @@ class RouterTree extends Router {
 	}
 
 	// Just an example for debug/test
-	private function url($namePath) {
+	private function url($namePath)
+	{
 		$args = \func_get_args();
 		unset($args[0]);
 		$pattern = $this->nameIndex[$namePath];
@@ -152,15 +160,18 @@ class RouterTree extends Router {
 		return $pattern;
 	}
 
-	private function createNameIndex($routes) {
+	private function createNameIndex($routes)
+	{
 		$trav = new \glenn\router\datastructures\TreeIndexer();
 		$this->nameIndex = $trav->buildNameIndex($routes);
 	}
 
-	/** Unsupported, add all routes at once instead using addRoutes.
-	 * 	@throws Exception Not supported operation, always throwed.
+	/**
+	 * Unsupported, add all routes at once instead using addRoutes.
+	 * @throws Exception Not supported operation, always throwed.
 	 */
-	public function addRoute($route) {
+	public function addRoute($route)
+	{
 		throw new Exception("Unsupported operation");
 	}
 
