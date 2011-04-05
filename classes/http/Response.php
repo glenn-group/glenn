@@ -114,10 +114,25 @@ class Response extends Message implements interfaces\Response
     }
 
     /**
-     * 
+     * Return the HTTP response as a string.
      */
     public function __toString() {
-        
+		// Append protocol
+        $output = \sprintf("%s %s %s", $this->protocol, $this->status, $this->statuses[$this->status]) . "\r\n";
+
+		// Append all headers
+        foreach ($this->headers as $key => $value) {
+			if(\is_array($value)) {
+				foreach($value as $val) {
+					$output .= \sprintf("%s: %s", $key, $val) . "\r\n";
+				}
+			} else {
+				$output .= \sprintf("%s: %s", $key, $value) . "\r\n";
+			}
+        }
+		
+		// Return headers and body
+        return $output . "\r\n\r\n" . $this->body;
     }
 
 }
