@@ -4,45 +4,84 @@ namespace glenn\view;
 class View
 {
 	private $template;
-
+	private $file;
 	private $variables = array();
 	
 	public function __construct($template, array $variables = array())
 	{
-		$this->template  = $template;
+		$this->setTemplate($template);
 		$this->variables = $variables;
 	}
 
+	/**
+	 * Render the view using the set variables.
+	 *
+	 * @return string
+	 */
 	public function render()
 	{
-		$file = APP_PATH . 'views/' . $this->template . ".php";
-		if (file_exists($file)) {
-			extract($this->variables);
-			ob_start();
-			include $file;
-			$output = ob_get_contents();
-			ob_end_clean();
-			return $output;
-		} else {
-			throw new \InvalidArgumentException("View file '$file' could not be located.");
-		}
+		extract($this->variables);
+		ob_start();
+		include $this->file;
+		$output = ob_get_contents();
+		ob_end_clean();
+		return $output;
 	}
 
+	/**
+	 * Set the a variable to be used in the view.
+	 *
+	 * @param string $name
+	 * @param mixed $value 
+	 */
 	public function set($name, $value)
 	{
 		$this->variables[$name] = $value;
 	}
 	
-	public static function factory($file, $params)
+	/**
+	 * Set the template file.
+	 *
+	 * @param string $template 
+	 */
+	public function setTemplate($template)
+	{
+		$file = APP_PATH . 'views/' . $template . '.php';
+		if (!file_exists($file)) {
+			throw new \InvalidArgumentException("View file '$file' could not be located.");
+		}
+		$this->file = $file;
+		$this->template  = $template;
+	}
+	
+	/**
+	 * Factory for creating view instances.
+	 *
+	 * @param string $file
+	 * @param array $params
+	 * @return View 
+	 */
+	public static function factory($file, array $params = array())
 	{
 		return new View($file, $params);
 	}
 	
+	/**
+	 * Magic setter fort view variables.
+	 *
+	 * @param string $name
+	 * @param mixed $value 
+	 */
 	public function __set($name, $value)
 	{
 		$this->set($name, $value);
 	}
 
+	/**
+	 * Render the view.
+	 *
+	 * @return string
+	 */
 	public function __tostring()
 	{
 		return $this->render();
