@@ -5,6 +5,7 @@ use glenn\event\Event;
 use glenn\event\EventHandler;
 use glenn\http\Request;
 use glenn\http\Response;
+use glenn\router\Router;
 
 class Dispatcher
 {
@@ -23,31 +24,43 @@ class Dispatcher
 	protected $controllerSuffix = 'Controller';
 	
 	/**
-	 * Stack of EventHandlers
+	 * The dispatcher's EventHandler
+	 * 
+	 * @var EventHandler
 	 */
-	protected $events = array();
+	protected $events;
 	
 	/**
-	 * Dispatch a request
+	 * The dispatcher's Router
+	 * 
+	 * @var Router
+	 */
+	protected $router;
+	
+	/**
+	 * 
+	 * 
+	 * @param Router $router
+	 */
+	public function __construct(Router $router)
+	{
+		$this->events = new EventHandler();
+		$this->router = $router;
+	}
+	
+	/**
+	 * Dispatch a request internally or externally
 	 * 
 	 * @param  Request  $request 
 	 * @return Response
 	 */
 	public function dispatch(Request $request)
 	{
-		// Push a new EventHandler to the top of the stack
-		$this->pushEventHandler();
-		
 		if ($this->isExternal($request)) {
-			$response = $this->dispatchExternal($request);
+			return $this->dispatchExternal($request);
 		} else {
-			$response = $this->dispatchInternal($request);
+			return $this->dispatchInternal($request);
 		}
-		
-		// Pull EventHandler from the top of the stack
-		$this->pullEventHandler();
-		
-		return $response;
 	}
 	
 	/**
@@ -55,7 +68,7 @@ class Dispatcher
 	 */
 	public function events()
 	{
-		return $this->events[\count($this->events) - 1];
+		return $this->events;
 	}
 	
 	/**
@@ -67,14 +80,13 @@ class Dispatcher
 	protected function dispatchExternal($request)
 	{
 		// Open up a socket to the host
-		if (\strpos($request->uri(), 'http://') === 0) {
-			$fp = \fsockopen($request->hostname(), 80);
-		} else {
-			$fp = \fsockopen('ssl://'.$request->hostname(), 443);
-		}
-		
-		if (!$fp) {
-			throw new Exception('Connection could not be established with ' . $request->uri());
+		switch($request->scheme()) {
+			case 'http://':
+				$fp = \fsockopen($request->hostname(), 80); 
+				break;
+			case 'https://':
+				$fp = \fsockopen('ssl://' . $request->hostname(), 443); 
+				break;
 		}
 		
 		// Make sure the connection is not kept alive
@@ -102,14 +114,34 @@ class Dispatcher
 	 */
 	protected function dispatchInternal($request)
 	{
+		$result = $this->router->resolveRoute($request);
+		$request->controller = $result['controller'];
+		$request->action     = $result['action'];
+		
+		//
+		$responses = $this->triggerUntilResponse(
+			$this->events(), new Event($this, 'glenn.dispatch.before', array(
+				'request'    => $request,
+				'controller' => $request->controller,
+				'action'     => $request->action
+			))
+		);
+		if (\count($responses) > 0) {
+			return $responses[0];
+		}
+		
 		// Instantiate action controller
 		$controller = Controller::factory(
 			$this->formatControllerName($request->controller), $request
 		);
 		
-		// Trigger dispatch before event
+		// 
 		$responses = $this->triggerUntilResponse(
-			$this->events(), new Event($controller, 'glenn.dispatch.before')
+			$controller->events(), new Event($controller, 'glenn.action.before', array(
+				'request'    => $request,
+				'controller' => $request->controller,
+				'action'     => $request->action
+			))
 		);
 		if (\count($responses) > 0) {
 			return $responses[0];
@@ -123,9 +155,25 @@ class Dispatcher
 			return $response;
 		}
 		
-		// Trigger dispatch after event
+		// 
 		$responses = $this->triggerUntilResponse(
-			$this->events(), new Event($controller, 'glenn.dispatch.after')
+			$controller->events(), new Event($controller, 'glenn.action.after', array(
+				'request'    => $request,
+				'controller' => $request->controller,
+				'action'     => $request->action
+			))
+		);
+		if (\count($responses) > 0) {
+			return $responses[0];
+		}
+		
+		//
+		$responses = $this->triggerUntilResponse(
+			$this->events(), new Event($this, 'glenn.dispatch.after', array(
+				'request'    => $request,
+				'controller' => $request->controller,
+				'action'     => $request->action
+			))
 		);
 		if (\count($responses) > 0) {
 			return $responses[0];
@@ -140,31 +188,46 @@ class Dispatcher
 		throw new \Exception('No response returned');
 	}
 	
+	/**
+	 * Format controller name into a proper class name
+	 * 
+	 * @param  string $unformatted
+	 * @return string
+	 */
 	protected function formatControllerName($unformatted)
 	{
 		return 'app\\controller\\' . \ucfirst($unformatted) . $this->controllerSuffix;
 	}
 	
+	/**
+	 * Format action name into a proper method name
+	 * 
+	 * @param  string $unformatted
+	 * @return string
+	 */
 	protected function formatActionName($unformatted)
 	{
 		return \lcfirst($unformatted) . $this->actionSuffix;
 	}
 	
+	/**
+	 * Determine if a request is internal or external
+	 * 
+	 * @param  Request $request
+	 * @return boolean
+	 */
 	protected function isExternal($request)
 	{
-		return \strpos($request->uri(), 'http://') === 0 || \strpos($request->uri(), 'https://') === 0;
+		return ($request->scheme() === 'http://' || $request->scheme() === 'https://');
 	}
 	
-	protected function pushEventHandler()
-	{
-		\array_push($this->events, new EventHandler());
-	}
-	
-	protected function pullEventHandler()
-	{
-		\array_pop($this->events);
-	}
-	
+	/**
+	 * 
+	 * 
+	 * @param  EventHandler $events
+	 * @param  Event        $event
+	 * @return array
+	 */
 	protected function triggerUntilResponse(EventHandler $events, Event $event)
 	{
 		return $events->triggerUntil(

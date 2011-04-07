@@ -6,22 +6,17 @@ class Request extends Message
 	/**
 	 * @var string
 	 */
-	protected $uri;
-	
+    protected $ajax = false;
+
+	/**
+	 * @var string
+	 */
+	protected $hostname;
+
 	/**
 	 * @var string
 	 */
     protected $method;
-	
-	/**
-	 * @var string
-	 */
-    protected $ajax;
-	
-	/**
-	 * @var string
-	 */
-    protected $secure;
 	
 	/**
 	 * @var array
@@ -29,55 +24,77 @@ class Request extends Message
 	protected $params = array();
 	
 	/**
+	 * @var string
+	 */
+	protected $scheme = '';
+	
+	/**
+	 * @var string
+	 */
+    protected $secure = false;
+	
+	/**
+	 * @var string
+	 */
+	protected $uri;
+	
+	/**
 	 * @param string $uri
 	 * @param string $method
 	 */
 	public function __construct($uri = null, $method = null, $headers = array())
 	{
-        if ($uri !== null) {
-            $this->uri = $uri;
-        } else if ($_SERVER['REQUEST_URI'] !== null) {
-            $this->uri = $_SERVER['REQUEST_URI'];
-        }
-        
-        if ($method !== null) {
-            $this->method = $method;
-        } else if ($_SERVER['REQUEST_METHOD'] !== null) {
-            $this->method = $_SERVER['REQUEST_METHOD'];
-        }
-        
-		if (\strpos($this->uri, 'https://') === 0) {
-			$this->secure = true;
+		// Let's start by setting the request uri
+		if ($uri !== null) {
+			$this->uri = $uri;
+		} else if ($_SERVER['REQUEST_URI'] !== null) {
+			$this->uri = $_SERVER['REQUEST_URI'];
+		}
+
+		// Next up, the request method needs some love
+		if ($method !== null) {
+			$this->method = $method;
+		} else if (isset($_POST['_method'])) {
+			$this->method = $_POST['_method'];
+		} else if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+			$this->method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
 		} else {
-			$this->secure = false;
+			$this->method = $_SERVER['REQUEST_METHOD'];
+		}
+        
+		// Support http:// and https:// schemes
+		if (\strpos($this->uri, 'http://') === 0) {
+			$this->scheme = 'http://';
+		} else if (\strpos($this->uri, 'https://') === 0) {
+			$this->scheme = 'https://';
 		}
 		
-		// Check if this request is an AJAX request
-		if ( (\strpos($this->uri, 'https://') === 0 || \strpos($this->uri, 'http://') === 0)
-				&& isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-				&& \strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+		// Strip out the hostname from the uri
+		$l = \strlen($this->scheme);
+		if ($l > 0) {
+			$this->hostname = \substr($this->uri, $l, \strpos($this->uri, '/', $l) - $l);
+		} else {
+			$this->hostname = $this->uri;
+		}
+		
+		// Is the request secure?
+		$this->secure = ($this->scheme() === 'https://') ?: true;
+		
+		// Is the request an ajax request?
+		if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
 			$this->ajax = true;
-		} else {
-			$this->ajax = false;
 		}
 		
+		// Finally, add the host as a request header for extra niceness
         $this->addHeader('Host', $this->hostname());
     }
 	
 	/**
 	 * @return string
 	 */
-	public function uri()
-	{
-		return $this->uri;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function method()
-	{
-		return $this->method;
+	public function hostname()
+	{	
+		return $this->hostname;
 	}
 	
 	/**
@@ -101,13 +118,24 @@ class Request extends Message
 	/**
 	 * @return string
 	 */
-	public function hostname()
+	public function method()
 	{
-		if (\strpos($this->uri, 'http://') === 0) {
-			return \substr($this->uri, 7, \strpos($this->uri(), '/', 7) - 7);
-		} else if (\strpos($this->uri, 'https://') === 0) {
-			return \substr($this->uri, 8, \strpos($this->uri(), '/', 8) - 8);
-		}
+		return $this->method;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function scheme()
+	{
+		return $this->scheme;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function uri()
+	{
 		return $this->uri;
 	}
 	

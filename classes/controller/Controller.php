@@ -2,6 +2,7 @@
 namespace glenn\controller;
 
 use glenn\event\Event;
+use glenn\event\EventHandler;
 use glenn\http\Request;
 use glenn\http\Response;
 use glenn\view\View;
@@ -22,6 +23,11 @@ abstract class Controller
 	 */
 	protected $before = array();
     
+	/**
+	 * @var EventHandler
+	 */
+	protected $events;
+	
 	/**
 	 * @var Request
 	 */
@@ -59,7 +65,7 @@ abstract class Controller
 	 */
     public function __construct(Request $request)
     {
-		// Set the request for this dispatch cycle
+		$this->events  = new EventHandler();
         $this->request = $request;
 		
 		// Create a view with some sane defaults
@@ -68,18 +74,29 @@ abstract class Controller
 		);
 		
 		// Bind filters to be triggered before dispatch
-		$this->bindFilters($this->before, 'glenn.dispatch.before');
+		$this->bindFilters($this->before, 'glenn.action.before');
 		
 		// Automagically set a response after dispatch
-		Dispatcher::events()->bind('glenn.dispatch.after', function(Event $e) {
-			if ($e->subject()->response() === null) {
-				$e->subject()->setResponse();
+		$this->events->bind('glenn.action.after', function(Event $e) {
+			$controller = $e->subject();
+			if ($controller->response() === null) {
+				$controller->setResponse(new Response(
+					$controller->view()->render()
+				));
 			}
 		});
 		
 		// Bind filters to be triggered after dispatch
-		$this->bindFilters($this->after, 'glenn.dispatch.after');
+		$this->bindFilters($this->after, 'glenn.action.after');
     }
+	
+	/**
+	 * @return EventHandler
+	 */
+	public function events()
+	{
+		return $this->events;
+	}
 	
 	/**
 	 * @return Request
@@ -100,11 +117,8 @@ abstract class Controller
 	/**
 	 * @param Response $response 
 	 */
-	public function setResponse(Response $response = null)
+	public function setResponse(Response $response)
 	{
-		if ($response === null) {
-			$response = new Response($this->view->render());
-		}
 		$this->response = $response;
 	}
 	
@@ -125,8 +139,8 @@ abstract class Controller
 	}
 	
 	/**
-	 * Bind filters on the dispatcher's current EventHandler. A filter is 
-	 * simply a public method on the subject controller of the event.
+	 * Bind filters on this controller's EventHandler. A filter is a 
+	 * public method on the subject of the event (this controller).
 	 * 
 	 * @param array  $filters Array of filters to be bound
 	 * @param string $event   Event to bind filters to
@@ -142,7 +156,7 @@ abstract class Controller
 			} else {
 				$filter = $value;
 			}			
-			Dispatcher::events()->bind($event, function(Event $e) use($filter) {
+			$this->events->bind($event, function(Event $e) use($filter) {
 				return \call_user_func(array($e->subject(), $filter));
 			});
 		}
