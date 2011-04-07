@@ -31,7 +31,7 @@ abstract class Controller
 	/**
 	 * @var Request
 	 */
-    protected $request;
+	protected $request;
 	
 	/**
 	 * @var Response
@@ -48,8 +48,8 @@ abstract class Controller
 	 * @param  Request    $request
 	 * @return Controller
 	 */
-    public static function factory($class, Request $request)
-    {
+	public static function factory($class, Request $request)
+	{
 		if (!class_exists($class)) {
 			throw new \Exception("Class $class does not exist");
 		}
@@ -58,37 +58,38 @@ abstract class Controller
 			throw new \Exception("Class $class not instance of Controller");
 		}
 		return $controller;
-    }
-    
+	}
+
 	/**
 	 * @param Request request
 	 */
-    public function __construct(Request $request)
-    {
+	public function __construct(Request $request)
+	{
 		$this->events  = new EventHandler();
-        $this->request = $request;
+		$this->request = $request;
 		
 		// Create a view with some sane defaults
-		$this->view = new View(
-			$request->controller . '/' . $request->action
-		);
+		$this->events->bind('glenn.action.before', function(Event $e) {
+			$e->subject()->setView(new View(
+				$e->param('controller') . '/' . $e->param('action')
+			));
+		});
 		
 		// Bind filters to be triggered before dispatch
 		$this->bindFilters($this->before, 'glenn.action.before');
 		
 		// Automagically set a response after dispatch
 		$this->events->bind('glenn.action.after', function(Event $e) {
-			$controller = $e->subject();
-			if ($controller->response() === null) {
-				$controller->setResponse(new Response(
-					$controller->view()->render()
+			if ($e->subject()->response() === null) {
+				$e->subject()->setResponse(new Response(
+					$e->subject()->view()->render()
 				));
 			}
 		});
 		
 		// Bind filters to be triggered after dispatch
 		$this->bindFilters($this->after, 'glenn.action.after');
-    }
+	}
 	
 	/**
 	 * @return EventHandler
