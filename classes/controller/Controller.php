@@ -42,23 +42,6 @@ abstract class Controller
 	 * @var View
 	 */
 	protected $view;
-    
-	/**
-	 * @param  string     $class
-	 * @param  Request    $request
-	 * @return Controller
-	 */
-	public static function factory($class, Request $request)
-	{
-		if (!class_exists($class)) {
-			throw new \Exception("Class $class does not exist");
-		}
-		$controller = new $class($request);
-		if (!$controller instanceof self) {
-			throw new \Exception("Class $class not instance of Controller");
-		}
-		return $controller;
-	}
 
 	/**
 	 * @param Request request

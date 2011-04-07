@@ -130,10 +130,14 @@ class Dispatcher
 			return $responses[0];
 		}
 		
-		// Instantiate action controller
-		$controller = Controller::factory(
-			$this->formatControllerName($request->controller), $request
-		);
+		// Format controller name into a usable class name
+		$class = $this->formatControllerName($request->controller);
+		
+		// Instantiate controller
+		$controller = new $class($request);
+		if (!$controller instanceof Controller) {
+			throw new \Exception("Class $class not instance of Controller");
+		}
 		
 		// 
 		$responses = $this->triggerUntilResponse(
