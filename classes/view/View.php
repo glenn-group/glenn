@@ -46,7 +46,7 @@ class View
 	 */
 	public function setTemplate($template)
 	{
-		$file = APP_PATH . 'views/' . $template . '.php';
+		$file = \glenn\loader\Loader::find('views', $template.'.phtml');
 		if (!file_exists($file)) {
 			throw new \InvalidArgumentException("View file '$file' could not be located.");
 		}
