@@ -39,29 +39,30 @@ abstract class Test {
 	
 	protected function assertNotEqual($result, $other)
 	{
-		$this->assert('NotEqual', $result === $other, false);
+		$this->assert($result === $other, false);
 	}
 	
 	protected function assertEqual($result, $other)
 	{
-		$this->assert('Equal', $result, $other);
+		$this->assert($result, $other);
 	}
 	
 	protected function assertFalse($result)
 	{
-		$this->assert('False', $result, false);
+		$this->assert($result, false);
 	}
 	
 	protected function assertTrue($result)
 	{
-		$this->assert('True', $result, true);
+		$this->assert($result, true);
 	}
 	
-	protected function assert($type, $data, $expected)
+	protected function assert($data, $expected)
 	{
 		$trace = debug_backtrace();
 		\array_shift($trace);
-		\array_shift($trace);
+		$lastTrace = \array_shift($trace);
+		$type = \substr($lastTrace['function'], \strlen('assert'));
 		$lastTrace = \array_shift($trace);
 		$test = $lastTrace['function'];
 		$result = ($data === $expected);
