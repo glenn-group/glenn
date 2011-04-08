@@ -1,7 +1,7 @@
 <?php
 namespace glenn\http;
 
-class Response extends Message
+class Response extends Message implements interfaces\Response
 {
     /**
      * @var string

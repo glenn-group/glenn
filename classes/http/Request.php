@@ -1,19 +1,23 @@
 <?php
 namespace glenn\http;
 
-class Request extends Message
+class Request extends Message implements interfaces\Request
 {
-	/**
-	 *
-	 * @var array
-	 */
-	private $allowedMethods = array('POST', 'GET', 'PUT', 'DELETE');
-	
 	/**
 	 * @var string
 	 */
     protected $ajax = false;
+	
+	/**
+	 * @var array
+	 */
+	private $allowedMethods = array('POST', 'GET', 'PUT', 'DELETE');
 
+	/**
+	 * @var array
+	 */
+	protected $cookies = array();
+	
 	/**
 	 * @var string
 	 */
@@ -152,16 +156,28 @@ class Request extends Message
 		return $this->uri;
 	}
 	
+	public function cookie($name)
+	{
+		if (\array_key_exists($name, $this->cookies)) {
+			return $this->cookies[$name];
+		} else if (isset($_COOKIE[$name])) {
+			$this->cookies[$name] = Cookie::get($name);
+			return $this->cookies[$name];
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Returns GET parameter $key. If no key is specified, the full GET 
 	 * array is returned. Filtered by default.
 	 * 
 	 * @return array|string
 	 */
-    /*public function get($key = null, $filter = true)
+    public function get($key = null, $filter = true)
     {
         return $this->param($key, $filter, INPUT_GET);
-    }*/
+    }
     
     /**
 	 * Returns POST parameter $key. If no key is specified, the full POST 
@@ -169,10 +185,10 @@ class Request extends Message
 	 * 
 	 * @return array|string
 	 */
-    /*public function post($key = null, $filter = true)
+    public function post($key = null, $filter = true)
     {
         return $this->param($key, $filter, INPUT_POST);
-    }*/
+    }
     
     /**
 	 * Filters request parameters using native PHP filters. If no key is 
@@ -180,7 +196,7 @@ class Request extends Message
 	 * 
 	 * @return array|string
 	 */
-    /*protected function paramram($key, $filter, $type)
+    protected function param($key, $filter, $type)
 	{
         if ($key === null || $key === true) {
             return filter_input_array($type, FILTER_SANITIZE_STRING) ?: array();
@@ -191,9 +207,9 @@ class Request extends Message
         } else {
             return filter_input($type, $key, FILTER_UNSAFE_RAW);
         }
-    }*/
+    }
 	
-	public function param($key)
+	public function paramram($key)
 	{
 		if (\array_key_exists($key, $this->params)) {
 			return $this->params[$key];
@@ -208,7 +224,7 @@ class Request extends Message
 	
 	public function __get($key)
 	{
-		return $this->param($key);
+		return $this->paramram($key);
 	}
 	
 	public function __set($key, $value)
