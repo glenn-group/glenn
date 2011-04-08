@@ -114,7 +114,7 @@ class Dispatcher
 	 */
 	protected function dispatchInternal($request)
 	{
-		$result = $this->router->resolveRoute($request);
+		$result = $this->router->route($request);
 		$request->controller = $result['controller'];
 		$request->action     = $result['action'];
 		
