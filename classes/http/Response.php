@@ -136,7 +136,13 @@ class Response extends Message
             $this->statuses[$this->status]
         ));
         foreach ($this->headers as $key => $value) {
-            header(\sprintf("%s: %s", $key, $value));
+			if(\is_array($value)) {
+				foreach($value as $val) {
+					header(\sprintf("%s: %s", $key, $val));
+				}
+			} else {
+				header(\sprintf("%s: %s", $key, $value));
+			}
         }
         echo $this->body;
     }
