@@ -13,7 +13,7 @@
 			}
 
 			h1 {
-				color: #cc0000;
+				color: #000000;
 				border-bottom: 1px solid #D0D0D0;
 				font-size: 16px;
 				font-weight: bold;
@@ -71,7 +71,7 @@
 	</head>
 	<body>
 
-		<h1>Tests</h1>
+		<h1><?=$tests?> test(s) run</h1>
 		<pre><?php // var_dump($results) ?></pre>
 		<?php foreach($results as $method => $result): ?>
 		<div class="<?=$result['result']?>">
@@ -79,7 +79,8 @@
 			<?php foreach($result['asserts'] as $assert): ?>
 			<ul>
 				<strong><?= ($assert['result']) ? 'PASS' : 'FAIL' ?>:</strong>
-				<code><?=$assert['code']?></code> on line <?=$assert['line']?>
+				Tested value <em><?=$assert['data']?></em> against <em><?=$assert['expected']?></em>
+				<p>Line <?=$assert['line']?>: <code><?=$assert['code']?></code></p>
 			</ul>
 			<?php endforeach; ?>
 		</div>
