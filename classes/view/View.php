@@ -42,9 +42,6 @@ class View
 	 */
 	public function render()
 	{
-		if ($this->template === null) {
-			throw new \Exception('No template defined');
-		}
 		extract($this->variables);
 		ob_start();
 		include $this->template;
@@ -75,7 +72,6 @@ class View
 		if (!file_exists($this->template)) {
 			throw new \Exception("View file '$this->template' could not be located.");
 		}
-		$this->template = $template;
 	}
 	
 	/**
