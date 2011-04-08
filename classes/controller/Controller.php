@@ -132,16 +132,15 @@ abstract class Controller
 	protected function bindFilters($filters, $event)
 	{
 		foreach ($filters as $key => $value) {
-			if (\is_array($value)) {
-				if (!\in_array($this->request->action, $value)) {
-					continue;
+			$this->events->bind($event, function(Event $e) use ($key, $value) {
+				if (\is_array($value)) {
+					if (!\in_array($e->param('action'), $value)) {
+						return false;
+					}
+					return \call_user_func(array($e->subject(), $key));
+				} else {
+					return \call_user_func(array($e->subject(), $value));
 				}
-				$filter = $key;
-			} else {
-				$filter = $value;
-			}			
-			$this->events->bind($event, function(Event $e) use($filter) {
-				return \call_user_func(array($e->subject(), $filter));
 			});
 		}
 	}
