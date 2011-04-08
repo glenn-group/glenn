@@ -4,6 +4,7 @@ namespace glenn\test;
 
 abstract class Test {
 	private $results = array();
+	private $code;
 	
 	/**
 	 *
@@ -16,17 +17,13 @@ abstract class Test {
 		});
 		foreach($tests as $test) {
 			$name = \substr($test, \strlen('test'));
+			$this->results[$test]['name'] = $name;
+			$this->results[$test]['asserts'] = array();
 			try {
 				$this->$test();
-				$this->results[$test] = $this->results[$test] + array(
-					'name' => $name,
-					'result' => 'pass'
-				);
+				$this->results[$test]['result'] = 'pass';
 			} catch (AssertException $ae) {
-				$this->results[$test] = $this->results[$test] + array(
-						'name' => $name,
-						'result' => 'fail'
-				);
+				$this->results[$test]['result'] = 'fail';
 			}
 		}
 		return $this->results();
@@ -63,10 +60,15 @@ abstract class Test {
 		\array_shift($trace);
 		$lastTrace = \array_shift($trace);
 		$type = \substr($lastTrace['function'], \strlen('assert'));
+		$line = $lastTrace['line'];
+		if($this->code === null) {
+			$this->code = file($lastTrace['file']);
+		}
+		$code = $this->code[$line-1];
 		$lastTrace = \array_shift($trace);
 		$test = $lastTrace['function'];
 		$result = ($data === $expected);
-		$this->results[$test]['asserts'][] = \compact('type', 'result', 'data', 'expected');
+		$this->results[$test]['asserts'][] = \compact('type', 'result', 'data', 'expected', 'line', 'code');
 
 		if ($result !== true) {
 			throw new AssertException();

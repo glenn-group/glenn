@@ -79,7 +79,7 @@
 			<?php foreach($result['asserts'] as $assert): ?>
 			<ul>
 				<strong><?= ($assert['result']) ? 'PASS' : 'FAIL' ?>:</strong>
-				assert<?=$assert['type']?> for <?=$assert['data']?>
+				<code><?=$assert['code']?></code> on line <?=$assert['line']?>
 			</ul>
 			<?php endforeach; ?>
 		</div>
