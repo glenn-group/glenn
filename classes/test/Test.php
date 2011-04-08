@@ -23,6 +23,9 @@ abstract class Test {
 	 */
 	public function run()
 	{
+		$this->setUp();
+		
+		// Run all tests
 		foreach($this->tests as $test) {
 			$name = \substr($test, \strlen('test'));
 			$this->results[$test]['name'] = $name;
@@ -34,6 +37,9 @@ abstract class Test {
 				$this->results[$test]['result'] = 'fail';
 			}
 		}
+		
+		$this->tearDown();
+		
 		return $this->results();
 	}
 	
@@ -45,6 +51,20 @@ abstract class Test {
 	public function countTestCases()
 	{
 		return \count($this->tests);
+	}
+	
+	/**
+	 * Set up the fixture in preperation of running the tests.
+	 */
+	protected function setUp()
+	{
+	}
+	
+	/**
+	 * Tear down the fixture after completing all tests.
+	 */
+	protected function tearDown()
+	{
 	}
 	
 	/**
