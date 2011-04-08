@@ -138,9 +138,8 @@ abstract class Controller
 						return false;
 					}
 					return \call_user_func(array($e->subject(), $key));
-				} else {
-					return \call_user_func(array($e->subject(), $value));
 				}
+				return \call_user_func(array($e->subject(), $value));
 			});
 		}
 	}
