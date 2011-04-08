@@ -27,11 +27,9 @@ class View
 	 * @param string $template
 	 * @param array  $variables 
 	 */
-	public function __construct($template = null, array $variables = array())
+	public function __construct($template, array $variables = array())
 	{
-		if ($template !== null) {
-			$this->setTemplate($template);
-		}
+		$this->setTemplate($template);
 		$this->variables = $variables;
 	}
 
@@ -68,10 +66,11 @@ class View
 	 */
 	public function setTemplate($template)
 	{
-		$this->template = APP_PATH . 'views/' . $template . '.php';
-		if (!file_exists($this->template)) {
-			throw new \Exception("View file '$this->template' could not be located.");
+		$template = APP_PATH . 'views/' . $template . '.php';
+		if (!file_exists($template)) {
+			throw new \Exception("View template '$template' could not be located.");
 		}
+		$this->template = $template;
 	}
 	
 	/**
