@@ -12,9 +12,12 @@ class ExampleTest extends Test
 	{
 		$this->assertTrue(Validation::email('santa@gmail.com'));
 		$this->assertTrue(Validation::email('brandon.flowers.killers@super-secret.mail.mobi'));
-		$this->assertFalse(Validation::email('santa@ymail,com'));
-		$this->assertFalse(Validation::email('santa.clause@hotmail.c'));
-		$this->assertFalse(Validation::email('santa¢lause@gmail.com'));
+		$this->assertFalse(Validation::email('brandon.flowers.killers@super-secret.mail.mobilephone'));
+		$this->multiAssert('False', array(
+			Validation::email('santa@ymail,com'),
+			Validation::email('santa.clause@hotmail.c'),
+			Validation::email('santa¢lause@gmail.com')
+		));
 	}
 	
 	public function testSha1()

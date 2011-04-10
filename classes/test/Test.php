@@ -5,7 +5,7 @@ namespace glenn\test;
 abstract class Test {
 	private $results;
 	private $tests;
-	private $code;
+	private $currentTest;
 	
 	function __construct()
 	{
@@ -27,8 +27,8 @@ abstract class Test {
 		
 		// Run all tests
 		foreach($this->tests as $test) {
-			$name = \substr($test, \strlen('test'));
-			$this->results[$test]['name'] = $name;
+			$this->currentTest = $test;
+			$this->results[$test]['name'] = \substr($test, \strlen('test'));
 			$this->results[$test]['asserts'] = array();
 			try {
 				$this->$test();
@@ -78,52 +78,101 @@ abstract class Test {
 		return $this->results;
 	}
 	
-	protected function assertNotEqual($result, $other)
+	/**
+	 * Call one assertion method multiple times, one for each item in the data array.
+	 *
+	 * @param string $assert
+	 * @param array $data 
+	 */
+	protected function multiAssert($assert, array $data)
 	{
-		$this->assert($result, $other, false);
-	}
-	
-	protected function assertEqual($result, $other)
-	{
-		$this->assert($result, $other);
-	}
-	
-	protected function assertFalse($result)
-	{
-		$this->assert($result, false);
-	}
-	
-	protected function assertTrue($result)
-	{
-		$this->assert($result, true);
-	}
-	
-	protected function assert($data, $expected, $equality = true)
-	{
-		$trace = debug_backtrace();
-		
-		 // Remove this function from trace
-		\array_shift($trace);
-		
-		// Get calling assert method
-		$lastTrace = \array_shift($trace);
-		$type = \substr($lastTrace['function'], \strlen('assert'));
-		$line = $lastTrace['line'];
-		if($this->code === null) {
-			$this->code = file($lastTrace['file']);
+		$method = 'assert'.\ucfirst($assert);
+		if (!\method_exists($this, $method)) {
+			throw new \BadMethodCallException("No method $method exists.");
 		}
-		$code = $this->code[$line-1];
 		
-		// Get calling test method
-		$lastTrace = \array_shift($trace);
-		$test = $lastTrace['function'];
-		$result = $equality ? ($data === $expected) : ($data !== $expected);
-		$data = $this->toString($data);
-		$expected = $this->toString($expected);
-		$this->results[$test]['asserts'][] = \compact('type', 'result', 'data', 'expected', 'line', 'code');
+		foreach($data as $item) {
+			if(!\is_array($item)) {
+				$item = array($item);
+			}
+			\call_user_func_array(array($this, $method), $item);
+		}
+	}
+
+	/*
+	 * ASSERTION METHODS
+	 */
+
+	protected function assertNotEqual($value, $other)
+	{
+		// Assertion with closure that returns both assertion status and message.
+		$this->assert($value, $other, function($val, $val2) {
+			return array(
+				'status' => $val !== $val2,
+				'message' => '{value} must not be equal to {other}.'
+			);
+		});
+	}
+	
+	protected function assertEqual($value, $other)
+	{
+		// Assertion with boolean result and custom message.
+		$this->assert($value, $other, $value === $other, '{value} must equal {other}.');
+	}
+	
+	protected function assertFalse($value)
+	{
+		// Assertion with closure that only returns assertion status and with message passed 
+		// via assert parameter.
+		$this->assert($value, false, function($val, $val2) {
+			return $val === $val2;
+		}, '{value} must be false.');
+	}
+	
+	protected function assertTrue($value)
+	{
+		$this->assert($value, true, $value === true, '{value} must be true.');
+	}
+	
+	protected function assertInArray($value, $array)
+	{
+		$this->assert($value, $array, \in_array($value, $array));
+	}
+	
+	/**
+	 * Main assertion method of which all other assertions are only for convenience.
+	 *
+	 * @param mixed $value
+	 * @param mixed $other
+	 * @param boolean|closure $result
+	 * @param string $message
+	 */
+	protected function assert($value, $other, $result, $message = '')
+	{
+		// If result is a closure it must be called and its result evaluated
+		if (\is_callable($result)) {
+			$called = call_user_func_array($result, compact('value', 'other'));
+			if (\is_array($called)) {
+				extract($called, EXTR_OVERWRITE);
+			} else {
+				$status = $called;
+			}
+		} else {
+			$status = $result;
+		}
+		
+		// Replace keywords with method parameter data
+		$message = str_replace(
+				array('{value}', '{other}'), 
+				array($this->toString($value), $this->toString($other)),
+				$message
+		);
+		
+		// Store assertion result
+		$this->results[$this->currentTest]['asserts'][] = \compact('status', 'message');
 
 		// Throw assert error on failure to halt test execution
-		if ($result !== true) {
+		if ($status !== true) {
 			throw new AssertException();
 		}
 	}

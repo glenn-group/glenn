@@ -78,9 +78,8 @@
 			<h2>Test: <?= $result['name'] ?></h2>
 			<?php foreach($result['asserts'] as $assert): ?>
 			<ul>
-				<strong><?= ($assert['result']) ? 'PASS' : 'FAIL' ?>:</strong>
-				Tested value <em><?=$assert['data']?></em> against <em><?=$assert['expected']?></em>
-				<p>Line <?=$assert['line']?>: <code><?=$assert['code']?></code></p>
+				<strong><?= ($assert['status']) ? 'PASS' : 'FAIL' ?>:</strong>
+				<?=$assert['message']?>
 			</ul>
 			<?php endforeach; ?>
 		</div>
