@@ -30,11 +30,15 @@ abstract class Test {
 			$this->currentTest = $test;
 			$this->results[$test]['name'] = \substr($test, \strlen('test'));
 			$this->results[$test]['asserts'] = array();
+			$this->results[$test]['numFail'] = 0;
+			$this->results[$test]['numPass'] = 0;
 			try {
 				$this->$test();
 				$this->results[$test]['result'] = 'pass';
+				$this->results[$test]['numPass']++;
 			} catch (AssertException $ae) {
 				$this->results[$test]['result'] = 'fail';
+				$this->results[$test]['numFail']++;
 			}
 		}
 		
@@ -81,21 +85,42 @@ abstract class Test {
 	/**
 	 * Call one assertion method multiple times, one for each item in the data array.
 	 *
-	 * @param string $assert
-	 * @param array $data 
+	 * @param string|closure $assert
+	 * @param array $values 
+	 * @param array $others 
+	 * @param string $message
 	 */
-	protected function multiAssert($assert, array $data)
+	protected function multiAssert($assert, array $values, array $others = null, $message = '')
 	{
-		$method = 'assert'.\ucfirst($assert);
-		if (!\method_exists($this, $method)) {
-			throw new \BadMethodCallException("No method $method exists.");
+		// If no values are supplied we are done
+		if(empty($values)) {
+			return;
 		}
 		
-		foreach($data as $item) {
-			if(!\is_array($item)) {
-				$item = array($item);
+		// Check if assertion is a predefined method
+		$method = 'assert';
+		if (is_string($assert)) {
+			$method .= \ucfirst($assert);
+			if (!\method_exists($this, $method)) {
+				throw new \BadMethodCallException("No method $method exists.");
 			}
-			\call_user_func_array(array($this, $method), $item);
+		}
+		
+		// Call the specified assertion for each value
+		foreach($values as $key => $value) {
+			if ($method === 'assert') {
+				if ($others === null) {
+					$this->assert($value, null, $assert, $message);
+				} else {
+					$this->assert($value, $others[$key], $assert, $message);
+				}
+			} else {
+				if ($others === null) {
+					$this->$method($value, $message);
+				} else {
+					$this->$method($value, $others[$key], $message);
+				}
+			}
 		}
 	}
 
@@ -103,40 +128,40 @@ abstract class Test {
 	 * ASSERTION METHODS
 	 */
 
-	protected function assertNotEqual($value, $other)
+	protected function assertNotEqual($value, $other, $message = '')
 	{
 		// Assertion with closure that returns both assertion status and message.
-		$this->assert($value, $other, function($val, $val2) {
+		$this->assert($value, $other, function($val, $val2) use ($message) {
 			return array(
 				'status' => $val !== $val2,
-				'message' => '{value} must not be equal to {other}.'
+				'message' => $message ?: '{value} must not be equal to {other}.'
 			);
 		});
 	}
 	
-	protected function assertEqual($value, $other)
+	protected function assertEqual($value, $other, $message = '')
 	{
 		// Assertion with boolean result and custom message.
-		$this->assert($value, $other, $value === $other, '{value} must equal {other}.');
+		$this->assert($value, $other, $value === $other, $message ?: '{value} must equal {other}.');
 	}
 	
-	protected function assertFalse($value)
+	protected function assertFalse($value, $message = '')
 	{
 		// Assertion with closure that only returns assertion status and with message passed 
 		// via assert parameter.
 		$this->assert($value, false, function($val, $val2) {
 			return $val === $val2;
-		}, '{value} must be false.');
+		}, $message ?: '{value} must be false.');
 	}
 	
-	protected function assertTrue($value)
+	protected function assertTrue($value, $message = '')
 	{
-		$this->assert($value, true, $value === true, '{value} must be true.');
+		$this->assert($value, true, $value === true, $message ?: '{value} must be true.');
 	}
 	
-	protected function assertInArray($value, $array)
+	protected function assertInArray($value, $array, $message = '')
 	{
-		$this->assert($value, $array, \in_array($value, $array));
+		$this->assert($value, $array, \in_array($value, $array), $message);
 	}
 	
 	/**

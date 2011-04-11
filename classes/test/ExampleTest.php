@@ -13,11 +13,18 @@ class ExampleTest extends Test
 		$this->assertTrue(Validation::email('santa@gmail.com'));
 		$this->assertTrue(Validation::email('brandon.flowers.killers@super-secret.mail.mobi'));
 		$this->assertFalse(Validation::email('brandon.flowers.killers@super-secret.mail.mobilephone'));
-		$this->multiAssert('False', array(
-			Validation::email('santa@ymail,com'),
-			Validation::email('santa.clause@hotmail.c'),
-			Validation::email('santa¢lause@gmail.com')
-		));
+		$this->multiAssert(
+			function($value) {
+				return array(
+					'status' => Validation::email($value) === false,
+					'message' => '{value} must not be a valid e-mail address.'
+				);
+			}, array(
+				'santa@ymail,com',
+				'santa.clause@hotmail.c',
+				'santa¢lause@gmail.com'
+			)
+		);
 	}
 	
 	public function testSha1()
