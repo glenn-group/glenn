@@ -38,7 +38,7 @@ class ErrorHandler
 		// Clean output buffer if it's in use so we only print the error.
 		@ob_end_clean();
 		
-		include \glenn\loader\Loader::find('views', 'error.phtml');
+		include \glenn\loader\Loader::find('views', 'error.php');
 		
 		// Halt all execution. TODO: Should depend on error reporting settings.
 		exit(-1);
@@ -67,7 +67,7 @@ class ErrorHandler
 		// Clean output buffer if it's in use so we only print the error.
 		@ob_end_clean();
 		
-		include \glenn\loader\Loader::find('views', 'error.phtml');
+		include \glenn\loader\Loader::find('views', 'error.php');
 		
 		// Halt all execution. TODO: Should depend on error reporting settings.
 		exit(-1);
