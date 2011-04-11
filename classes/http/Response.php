@@ -1,10 +1,8 @@
 <?php
-
 namespace glenn\http;
 
-class Response extends Message implements interfaces\Response
+class Response extends Message
 {
-
     /**
      * @var string
      */
@@ -58,28 +56,85 @@ class Response extends Message implements interfaces\Response
         504 => 'Gateway Time-out'
     );
 
+	/**
+	 * Construct a new response object from a raw HTTP response string.
+	 * 
+     * @param  string   $string
+     * @return Response
+     */
+	public static function fromString($string)
+	{
+		$data = \explode("\r\n\r\n", $string);
+		foreach (\explode("\r\n", $data[0]) as $header) {
+			if (\strpos($header, 'HTTP') === 0) {
+				$status = \substr($header, \strpos($header, ' ') + 1, 3);
+			} else {
+				$headers[] = $header;
+			}
+		}
+		$response = new self($data[1], $status);
+		foreach($headers as $header) {
+			$response->addHeader(
+				\substr($header, 0, \strpos($header, ':')), 
+				\substr($header, \strpos($header, ':') + 1)
+			);
+		}
+		return $response;
+	}
+	
+    /**
+     * @param  string   $body
+     * @return Response
+     */
+    public static function internalError($body = null)
+    {
+        return new self($body, 500);
+    }
+	
+	/**
+     * @param  string   $body
+     * @return Response
+     */
+    public static function notFound($body = null)
+    {
+        return new self($body, 404);
+    }
+    
+    /**
+	 * @param  string   $uri
+     * @return Response
+     */
+    public static function redirect($url)
+    {
+        return new self(null, 302, array('Location' => $url));
+    }
+    
     /**
      * @param string $body
      * @param int    $status 
      */
-    public function __construct($body = null, $status = 200) {
+    public function __construct($body = null, $status = 200, array $headers = array()) 
+    {
         if ($body !== null) {
             $this->body = $body;
         }
-
         if (array_key_exists($status, $this->statuses)) {
             $this->status = $status;
         }
+        $this->headers = $headers;
     }
 
     /**
      * 
      */
-    public function send() {
-		// Set headers
-        header(\sprintf("%s %s %s", $this->protocol, $this->status, $this->statuses[$this->status]
-                ));
-
+    public function send() 
+	{
+        header(\sprintf(
+            "%s %s %s", 
+            $this->protocol, 
+            $this->status, 
+            $this->statuses[$this->status]
+        ));
         foreach ($this->headers as $key => $value) {
 			if(\is_array($value)) {
 				foreach($value as $val) {
@@ -89,50 +144,31 @@ class Response extends Message implements interfaces\Response
 				header(\sprintf("%s: %s", $key, $value));
 			}
         }
-		
-		// Echo body
         echo $this->body;
     }
 	
 	/**
-	 *
 	 * @return string
 	 */
 	public function body()
 	{
-		return $this->body();
+		return $this->body;
 	}
 
     /**
-     * @return Response
+     * @return string
      */
-    public static function redirect($url, $status = 302)
-    {
-        $response = new static(null, $status);
-        $response->addHeader('Location', $url);
-        return $response;
+    public function __toString() 
+	{
+        $response = \sprintf(
+            "%s %s %s\r\n", 
+            $this->protocol, 
+            $this->status, 
+            $this->statuses[$this->status]
+        );
+		foreach ($this->headers as $key => $value) {
+			$response .= \sprintf("%s: %s\r\n", $key, $value);
+		}
+		return $response .= "\r\n" . $this->body;
     }
-
-    /**
-     * Return the HTTP response as a string.
-     */
-    public function __toString() {
-		// Append protocol
-        $output = \sprintf("%s %s %s", $this->protocol, $this->status, $this->statuses[$this->status]) . "\r\n";
-
-		// Append all headers
-        foreach ($this->headers as $key => $value) {
-			if(\is_array($value)) {
-				foreach($value as $val) {
-					$output .= \sprintf("%s: %s", $key, $val) . "\r\n";
-				}
-			} else {
-				$output .= \sprintf("%s: %s", $key, $value) . "\r\n";
-			}
-        }
-		
-		// Return headers and body
-        return $output . "\r\n\r\n" . $this->body;
-    }
-
 }

@@ -1,8 +1,7 @@
 <?php
-
 namespace glenn\router;
 
-use glenn\http\interfaces\Request;
+use glenn\http\Request;
 
 /**
  * Router using tree-based routing.

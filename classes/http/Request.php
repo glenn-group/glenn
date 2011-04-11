@@ -1,26 +1,53 @@
 <?php
 namespace glenn\http;
 
-class Request extends Message implements interfaces\Request
+class Request extends Message
 {
 	/**
-	 *
+	 * @var string
+	 */
+    protected $ajax = false;
+	
+	/**
 	 * @var array
 	 */
 	private $allowedMethods = array('POST', 'GET', 'PUT', 'DELETE');
+
+	/**
+	 * @var array
+	 */
+	protected $cookies = array();
 	
+	/**
+	 * @var string
+	 */
+	protected $hostname;
+
 	/**
 	 * @var string
 	 */
     protected $method;
 	
-	private $cookies = array();
+	/**
+	 * @var array
+	 */
+	protected $params = array();
+	
+	/**
+	 * @var string
+	 */
+	protected $scheme = '';
+	
+	/**
+	 * @var string
+	 */
+    protected $secure = false;
 	
 	/**
 	 * @var string
 	 */
 	protected $uri;
-    
+	
 	/**
 	 * Leaving the parameters of the constructor empty will cause the object to use the information
 	 * of the current HTTP request. The request method can be overwritten using a POST parameter 
@@ -29,28 +56,81 @@ class Request extends Message implements interfaces\Request
 	 * @param string $uri
 	 * @param string $method
 	 */
-	public function __construct($uri = null, $method = null)
+	public function __construct($uri = null, $method = null, $headers = array())
 	{
-        if ($uri !== null) {
-            $this->uri = $uri;
-        } else if ($_SERVER['REQUEST_URI'] !== null) {
-            $this->uri = $_SERVER['REQUEST_URI'];
-        }
-        
-        if ($method !== null) {
-            $this->method = $method;
+		// Let's start by setting the request uri
+		if ($uri !== null) {
+			$this->uri = $uri;
+		} else if ($_SERVER['REQUEST_URI'] !== null) {
+			$this->uri = $_SERVER['REQUEST_URI'];
+		}
+
+		// Next up, the request method needs some love
+		if ($method !== null) {
+			$this->method = $method;
 		} else if (isset($_POST['_method'])) {
 			$this->method = $_POST['_method'];
-        } else if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+		} else if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
 			$this->method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
-		} else if ($_SERVER['REQUEST_METHOD'] !== null) {
-            $this->method = $_SERVER['REQUEST_METHOD'];
-        }
-		
-		if(!\in_array($this->method, $this->allowedMethods)) {
-			throw new Exception('HTTP method "' . $this->method . '" not allowed!');
+		} else {
+			$this->method = $_SERVER['REQUEST_METHOD'];
 		}
+		if(!\in_array($this->method, $this->allowedMethods)) {
+			throw new \Exception('HTTP method "' . $this->method . '" not allowed!');
+		}
+        
+		// Support http:// and https:// schemes
+		if (\strpos($this->uri, 'http://') === 0) {
+			$this->scheme = 'http://';
+		} else if (\strpos($this->uri, 'https://') === 0) {
+			$this->scheme = 'https://';
+		}
+		
+		// Strip out the hostname from the uri
+		$l = \strlen($this->scheme);
+		if ($l > 0) {
+			$this->hostname = \substr($this->uri, $l, \strpos($this->uri, '/', $l) - $l);
+		} else {
+			$this->hostname = $this->uri;
+		}
+		
+		// Is the request secure?
+		$this->secure = ($this->scheme() === 'https://') ?: true;
+		
+		// Is the request an ajax request?
+		if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+			$this->ajax = true;
+		}
+		
+		// Finally, add the host as a request header for extra niceness
+        $this->addHeader('Host', $this->hostname());
     }
+	
+	/**
+	 * @return string
+	 */
+	public function hostname()
+	{	
+		return $this->hostname;
+	}
+	
+	/**
+	 *
+	 * @return boolean
+	 */
+	public function isAjax()
+	{
+		return $this->ajax;
+	}
+	
+	/**
+	 *
+	 * @return boolean
+	 */
+	public function isSecure()
+	{
+		return $this->secure;
+	}
 	
 	/**
 	 * @return string
@@ -63,9 +143,29 @@ class Request extends Message implements interfaces\Request
 	/**
 	 * @return string
 	 */
+	public function scheme()
+	{
+		return $this->scheme;
+	}
+	
+	/**
+	 * @return string
+	 */
 	public function uri()
 	{
 		return $this->uri;
+	}
+	
+	public function cookie($name)
+	{
+		if (\array_key_exists($name, $this->cookies)) {
+			return $this->cookies[$name];
+		} else if (isset($_COOKIE[$name])) {
+			$this->cookies[$name] = Cookie::get($name);
+			return $this->cookies[$name];
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -89,18 +189,6 @@ class Request extends Message implements interfaces\Request
     {
         return $this->param($key, $filter, INPUT_POST);
     }
-	
-	public function cookie($name)
-	{
-		if (\array_key_exists($name, $this->cookies)) {
-			return $this->cookies[$name];
-		} else if (isset($_COOKIE[$name])) {
-			$this->cookies[$name] = Cookie::get($name);
-			return $this->cookies[$name];
-		} else {
-			return false;
-		}
-	}
     
     /**
 	 * Filters request parameters using native PHP filters. If no key is 
@@ -108,7 +196,7 @@ class Request extends Message implements interfaces\Request
 	 * 
 	 * @return array|string
 	 */
-    private function param($key, $filter, $type)
+    protected function param($key, $filter, $type)
 	{
         if ($key === null || $key === true) {
             return filter_input_array($type, FILTER_SANITIZE_STRING) ?: array();
@@ -121,10 +209,43 @@ class Request extends Message implements interfaces\Request
         }
     }
 	
+	public function paramram($key)
+	{
+		if (\array_key_exists($key, $this->params)) {
+			return $this->params[$key];
+		}
+		throw new \Exception('No such parameter');
+	}
+	
+	public function setParam($key, $value) 
+	{
+		$this->params[$key] = $value;
+	}
+	
+	public function __get($key)
+	{
+		return $this->paramram($key);
+	}
+	
+	public function __set($key, $value)
+	{
+		$this->setParam($key, $value);
+	}
+	
 	/**
 	 * @return string
 	 */
-    public function __toString() {
-        
-    }
+    public function __toString() 
+	{
+		$request = \sprintf(
+			"%s %s %s\r\n",
+			$this->method, 
+			$this->uri,
+			$this->protocol
+		);
+		foreach ($this->headers as $key => $value) {
+			$request .= \sprintf("%s: %s\r\n", $key, $value);
+		}
+		return $request .= "\r\n";
+	}
 }

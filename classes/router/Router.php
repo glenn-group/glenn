@@ -1,7 +1,7 @@
 <?php
 namespace glenn\router;
 
-use glenn\http\interfaces\Request;
+use glenn\http\Request;
 
 /** Generalization of router. Only retrival of instance and matching URI to
 *	route is supported. For configuration use concrete implementation.

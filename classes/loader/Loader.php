@@ -34,6 +34,11 @@ class Loader
 		}
 	}
 
+	public static function isRegistered($module)
+	{
+		return \array_key_exists($module, self::$modules);
+	}
+	
 	/**
 	 *
 	 * @param string $class 

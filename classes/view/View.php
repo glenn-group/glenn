@@ -3,10 +3,30 @@ namespace glenn\view;
 
 class View
 {
-	private $template;
-	private $file;
-	private $variables = array();
+	/**
+	 * @var string
+	 */
+	protected $template;
+
+	/**
+	 * @var array
+	 */
+	protected $variables = array();
 	
+	/**
+	 * @param  string $template
+	 * @param  array  $params
+	 * @return View 
+	 */
+	public static function factory($template, array $params)
+	{
+		return new View($template, $params);
+	}
+	
+	/**
+	 * @param string $template
+	 * @param array  $variables 
+	 */
 	public function __construct($template, array $variables = array())
 	{
 		$this->setTemplate($template);
@@ -22,7 +42,7 @@ class View
 	{
 		extract($this->variables);
 		ob_start();
-		include $this->file;
+		include $this->template;
 		$output = ob_get_contents();
 		ob_end_clean();
 		return $output;
@@ -42,35 +62,22 @@ class View
 	/**
 	 * Set the template file.
 	 *
-	 * @param string $template 
+	 * @param string $template
 	 */
 	public function setTemplate($template)
 	{
-		$file = \glenn\loader\Loader::find('views', $template.'.phtml');
-		if (!file_exists($file)) {
-			throw new \InvalidArgumentException("View file '$file' could not be located.");
+		$template = \glenn\loader\Loader::find('views', $template. '.php');
+		if (!file_exists($template)) {
+			throw new \Exception("View template '$template' could not be located.");
 		}
-		$this->file = $file;
-		$this->template  = $template;
-	}
-	
-	/**
-	 * Factory for creating view instances.
-	 *
-	 * @param string $file
-	 * @param array $params
-	 * @return View 
-	 */
-	public static function factory($file, array $params = array())
-	{
-		return new View($file, $params);
+		$this->template = $template;
 	}
 	
 	/**
 	 * Magic setter fort view variables.
 	 *
 	 * @param string $name
-	 * @param mixed $value 
+	 * @param mixed  $value 
 	 */
 	public function __set($name, $value)
 	{
