@@ -11,7 +11,6 @@ class Controller extends \glenn\controller\Controller
 		$this->view = new \glenn\view\View('test');
 	}
 
-	
 	public function index()
 	{
 		$test = new ExampleTest();

@@ -25,20 +25,21 @@ abstract class Test {
 	{
 		$this->setUp();
 		
+		$this->results['countFail'] = 0;
+		$this->results['countPass'] = 0;
+		
 		// Run all tests
 		foreach($this->tests as $test) {
 			$this->currentTest = $test;
-			$this->results[$test]['name'] = \substr($test, \strlen('test'));
-			$this->results[$test]['asserts'] = array();
-			$this->results[$test]['numFail'] = 0;
-			$this->results[$test]['numPass'] = 0;
+			$this->results['tests'][$test]['name'] = \substr($test, \strlen('test'));
+			$this->results['tests'][$test]['asserts'] = array();
 			try {
 				$this->$test();
-				$this->results[$test]['result'] = 'pass';
-				$this->results[$test]['numPass']++;
+				$this->results['tests'][$test]['status'] = 'pass';
+				$this->results['countPass']++;
 			} catch (AssertException $ae) {
-				$this->results[$test]['result'] = 'fail';
-				$this->results[$test]['numFail']++;
+				$this->results['tests'][$test]['status'] = 'fail';
+				$this->results['countFail']++;
 			}
 		}
 		
@@ -194,7 +195,7 @@ abstract class Test {
 		);
 		
 		// Store assertion result
-		$this->results[$this->currentTest]['asserts'][] = \compact('status', 'message');
+		$this->results['tests'][$this->currentTest]['asserts'][] = \compact('status', 'message');
 
 		// Throw assert error on failure to halt test execution
 		if ($status !== true) {

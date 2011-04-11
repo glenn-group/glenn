@@ -13,77 +13,48 @@
 			}
 
 			h1 {
-				color: #000000;
-				border-bottom: 1px solid #D0D0D0;
-				font-size: 16px;
-				font-weight: bold;
-				margin: 24px 0 2px 0;
-				padding: 5px 0 6px 0;
-			}
-
-			h2 {
 				font-size: 18px;
+			}
+			
+			table.results td {
+				vertical-align: top;
+				padding: 10px;
+				border-bottom: 1px solid #ccc;
 			}
 
 			.fail {
-				margin-top: 20px;
-				padding: 20px;
 				background-color: #f9eeee;
 				border: 1px solid #ffcfcf;
+				border-bottom-width: 0;
 			}
 			
 			.pass {
-				margin-top: 20px;
-				padding: 20px;
 				background-color: #eef9ee;
 				border: 1px solid #cfffcf;
-			}
-
-			ol {
-				overflow:auto;
-				font-family: Consolas, "Courier New", Courier,mono;
-				margin:0;
-				background-color: black;
-				color: #ccc;
-				width:90%;
-			}
-			
-			ol li {
-				background:#fff;
-				font-size:small;
-			}
-			
-			ol li code {
-				color:#666;
-				font-family: Consolas;
-				white-space: pre;
-			}
-			
-			ol li.active {
-				background-color: #ffcfcf;
-			}
-			
-			ol li.active code {
-				color: #000;
+				border-bottom-width: 0;
 			}
 
 		</style>
 	</head>
 	<body>
 
-		<h1><?=$tests?> test(s) run</h1>
-		<pre><?php // var_dump($results) ?></pre>
-		<?php foreach($results as $method => $result): ?>
-		<div class="<?=$result['result']?>">
-			<h2>Test: <?= $result['name'] ?></h2>
-			<?php foreach($result['asserts'] as $assert): ?>
-			<ul>
-				<strong><?= ($assert['status']) ? 'PASS' : 'FAIL' ?>:</strong>
-				<?=$assert['message']?>
-			</ul>
+		<h1>Test results</h1>
+		<table class="results" cellspacing="0">
+			<?php foreach($results['tests'] as $method => $result): ?>
+			<tr>
+				<td width="100"><strong><?=$method?></strong></td>
+				<td width="50" class="<?=$result['status']?>"><?=$result['status']?></td>
+				<td width="600">
+					<a href="#" onclick="var e = document.getElementById('asserts-<?=$method?>'); e.style.display = (e.style.display =='block') ? 'none' : 'block';"> <?=count($result['asserts'])?> assertions run</a>
+					<ul id="asserts-<?=$method?>" style="display: none">
+					<?php foreach ($result['asserts'] as $assert): ?>
+						<li><strong><?= ($assert['status']) ? 'PASS' : 'FAIL' ?>:</strong> <?= $assert['message'] ?></li>
+					<?php endforeach; ?>
+					</ul>
+				</td>
+			</tr>
 			<?php endforeach; ?>
-		</div>
-		<?php endforeach; ?>
+		</table>
 
 	</body>
 </html>
