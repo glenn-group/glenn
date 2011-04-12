@@ -48,22 +48,21 @@ abstract class Controller
 	 */
 	public function __construct(Request $request)
 	{
+		// Setting up the controller instance
 		$this->events  = new EventHandler();
 		$this->request = $request;
-		
-		// Create a view with some sane defaults
-		$this->events->bind('glenn.action.before', function(Event $e) {
-			$e->subject()->setView(new View(
-				$e->param('controller') . '/' . $e->param('action')
-			));
-		});
+		$this->view    = new View();
 		
 		// Bind filters to be triggered before dispatch
 		$this->bindFilters($this->before, 'glenn.action.before');
 		
-		// Automagically set a response after dispatch
+		// Automagically set view template and response after dispatch
 		$this->events->bind('glenn.action.after', function(Event $e) {
 			if ($e->subject()->response() === null) {
+				$e->subject()->view()->setTemplate(
+					$e->param('controller') . '/' . 
+					$e->param('action')
+				);
 				$e->subject()->setResponse(new Response(
 					$e->subject()->view()->render()
 				));

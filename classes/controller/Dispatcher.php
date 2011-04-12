@@ -65,6 +65,8 @@ class Dispatcher
 	
 	/**
 	 * Retrieve active EventHandler
+	 * 
+	 * @return EventHandler
 	 */
 	public function events()
 	{
