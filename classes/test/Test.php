@@ -14,7 +14,6 @@ abstract class Test {
 			return \strpos($method, 'test') === 0;
 		});
 	}
-
 	
 	/**
 	 * Run all tests in class and return the result array.
@@ -22,9 +21,7 @@ abstract class Test {
 	 * @return array
 	 */
 	public function run()
-	{
-		$this->setUp();
-		
+	{	
 		$this->results['countFail'] = 0;
 		$this->results['countPass'] = 0;
 		
@@ -33,6 +30,7 @@ abstract class Test {
 			$this->currentTest = $test;
 			$this->results['tests'][$test]['name'] = \substr($test, \strlen('test'));
 			$this->results['tests'][$test]['asserts'] = array();
+			$this->setUp();
 			try {
 				$this->$test();
 				$this->results['tests'][$test]['status'] = 'pass';
@@ -41,9 +39,8 @@ abstract class Test {
 				$this->results['tests'][$test]['status'] = 'fail';
 				$this->results['countFail']++;
 			}
+			$this->tearDown();
 		}
-		
-		$this->tearDown();
 		
 		return $this->results();
 	}
@@ -162,7 +159,7 @@ abstract class Test {
 	
 	protected function assertInArray($value, $array, $message = '')
 	{
-		$this->assert($value, $array, \in_array($value, $array), $message);
+		$this->assert($value, $array, \in_array($value, $array), $message ?: '{value} must be in {other}.');
 	}
 	
 	/**
