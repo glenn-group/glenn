@@ -26,5 +26,4 @@ class Annotations {
 
 		return $res;
 	}
-
 }
