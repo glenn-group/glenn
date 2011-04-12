@@ -53,16 +53,6 @@ class Parser {
 		return new Language\Behavior($requireClause, $ensuresClause);
 	}
 
-	private function parseExceptionalBehavior()
-	{
-		$this->skipToken(':');
-
-		$requireClause = $this->parseRequires();
-		$ensuresClause = $this->parseEnsures();
-
-		return new Language\Behavior($requireClause, $ensuresClause);
-	}
-
 	private function parseEnsures()
 	{
 		$this->skipToken('ensures');

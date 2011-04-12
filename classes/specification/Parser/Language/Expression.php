@@ -11,9 +11,10 @@ class Expression {
 
 	public function interpret($context = null) {
 		foreach($this->stmts as $stmt) {
-			$context = $stmt->interpret($context);
-			echo '<hr />';
+			$code[] = $stmt->interpret($context);
 		}
+
+		return $code;
 	}
 
 }

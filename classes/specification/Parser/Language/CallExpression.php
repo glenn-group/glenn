@@ -12,11 +12,15 @@ class CallExpression {
 	}
 
 	public function interpret($context) {
-		echo '<p>call "' . $this->method . '" with args: "';
+		$code = $this->method . '(';
+		$args = '';
 		foreach($this->arguments as $arg ) {
-			echo $arg . ', ';
+			$args .=  $arg . ', ';
 		}
-		echo '"<br />';
+		$args = substr($args, 0, strlen($args)-2) . ')';
+		$code .= $args;
+
+		return $code;
 	}
 
 }

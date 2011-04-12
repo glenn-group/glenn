@@ -14,7 +14,7 @@ class ComparisonExpression {
 	}
 
 	public function interpret($context) {
-		echo '<p>check "' . $this->left . ' ' . $this->operator . ' ' . $this->right . '"';
+		return $this->left . ' ' . $this->operator . ' ' . $this->right;
 	}
 
 }

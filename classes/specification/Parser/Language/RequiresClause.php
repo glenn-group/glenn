@@ -10,11 +10,12 @@ class RequiresClause {
 	}
 
 	public function interpret($context) {
-		echo '<p><strong>Requires</strong></p>';
+		$code = '';
 		foreach($this->stmts as $stmt) {
-			$context = $stmt->interpret($context);
+			$code .= $stmt->interpret($context) . ' && ';
 		}
-		return $context;
+		$code = substr($code, 0, strlen($code) - 4);
+		return $code;
 	}
 
 }

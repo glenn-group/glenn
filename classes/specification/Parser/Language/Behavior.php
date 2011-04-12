@@ -12,8 +12,10 @@ class Behavior {
 	}
 
 	public function interpret($context) {
-		$context = $this->requires->interpret($context);
-		return $this->ensures->interpret($context);
+		$code['requires'] = $this->requires->interpret($context);
+		$code['ensures'] = $this->ensures->interpret($context);
+
+		return $code;
 	}
 
 }

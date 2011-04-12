@@ -17,6 +17,16 @@ class TestGenerator {
 	public function generateTest($class) {
 		$annotation = $this->annotation;
 		$specs = $annotation->getContracts($class);
+		echo '<h2>'.$class.'</h2>';
+		foreach($specs as $spec) {
+			$tokenizer = new Parser\Tokenizer($spec);
+			$parser = new Parser\Parser($tokenizer);
+			$programModel = $parser->parseProgram();
+
+			echo '<p>';
+			print_r($programModel->interpret());
+			echo '</p>';
+		}
 	}
 
 	private function compileAnnotation($value) {
