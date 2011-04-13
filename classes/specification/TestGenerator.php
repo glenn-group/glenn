@@ -9,6 +9,7 @@ namespace glenn\specification;
 class TestGenerator {
 
 	private $annotation;
+	private $nrTests = 0;
 
 	public function __construct(Annotations $annotation) {
 		$this->annotation = $annotation;
@@ -17,23 +18,32 @@ class TestGenerator {
 	public function generateTest($class) {
 		$annotation = $this->annotation;
 		$specs = $annotation->getContracts($class);
-		echo '<h2>'.$class.'</h2>';
-		foreach($specs as $spec) {
+
+		// Create class which shall be filled with methods
+		$file = 'class Test'.$class."\n".'{'."\n";
+		
+		foreach($specs as $name => $spec) {
 			$tokenizer = new Parser\Tokenizer($spec);
 			$parser = new Parser\Parser($tokenizer);
 			$programModel = $parser->parseProgram();
-
-			echo '<p>';
-			print_r($programModel->interpret());
-			echo '</p>';
+			
+			$file .= $this->compileToPHP($name, $programModel->interpret());
 		}
+
+		$file .= '}';
+
+		// Write to file
+		echo $file;
 	}
 
-	private function compileAnnotation($value) {
-		foreach($value as $val) {
-			// Split into several
-			$class = '\\Test\\'.\ucfirst($this->getClass($val)) . 'Test';
+	private function compileToPHP($name, $code) {
+		// Create method with test
+		$res = '';
+		foreach($code as $c) {
+			$res .= 'public function ' . $name . '_' . $c['type'] . '_' . $this->nrTests++ . " {\n" .print_r($c, true) . "}\n";
 		}
+
+		return $res;
 	}
 
 	private function getClass($value) {

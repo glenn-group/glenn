@@ -27,7 +27,7 @@ class Parser {
 		}
 
 		if($value == 'exceptional_behavior') {
-			return $this->parseNormalBehavior();
+			return $this->parseExceptionalBehavior();
 		}
 	}
 
@@ -50,7 +50,7 @@ class Parser {
 		$requireClause = $this->parseRequires();
 		$ensuresClause = $this->parseEnsures();
 
-		return new Language\Behavior($requireClause, $ensuresClause);
+		return new Language\Behavior('normal_behavior', $requireClause, $ensuresClause);
 	}
 
 	private function parseExceptionalBehavior()
@@ -60,7 +60,7 @@ class Parser {
 		$requireClause = $this->parseRequires();
 		$ensuresClause = $this->parseEnsures();
 
-		return new Language\Behavior($requireClause, $ensuresClause);
+		return new Language\Behavior('exceptional_behavior', $requireClause, $ensuresClause);
 	}
 
 	private function parseEnsures()

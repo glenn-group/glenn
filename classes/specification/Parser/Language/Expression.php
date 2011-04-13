@@ -10,6 +10,8 @@ class Expression {
 	}
 
 	public function interpret($context = null) {
+		$code = array();
+		
 		foreach($this->stmts as $stmt) {
 			$code[] = $stmt->interpret($context);
 		}
