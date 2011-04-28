@@ -10,7 +10,7 @@ class Response extends Message
     /**
      * @var int
      */
-    protected $status;
+    public $status;
     /**
      * @var array
      */

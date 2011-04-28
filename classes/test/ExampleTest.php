@@ -34,4 +34,12 @@ class ExampleTest extends Test
 		$this->assertNotEqual($hash->hash(), sha1('1xS19!apassword2'));
 	}
 	
+	public function testExternalDispatch()
+	{
+		$dispatcher = new \glenn\controller\Dispatcher(new \glenn\router\RouterTree());
+		$response = $dispatcher->dispatch(new \glenn\http\Request('http://www.google.com/'));
+		$status = (int)$response->status;
+		$this->assertEqual($status, 302);
+	}
+	
 }
