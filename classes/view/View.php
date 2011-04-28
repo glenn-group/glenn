@@ -27,9 +27,11 @@ class View
 	 * @param string $template
 	 * @param array  $variables 
 	 */
-	public function __construct($template, array $variables = array())
+	public function __construct($template = null, array $variables = array())
 	{
-		$this->setTemplate($template);
+		if ($template !== null) {
+			$this->setTemplate($template);
+		}
 		$this->variables = $variables;
 	}
 
