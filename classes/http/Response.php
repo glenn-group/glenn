@@ -121,7 +121,9 @@ class Response extends Message
         if (array_key_exists($status, $this->statuses)) {
             $this->status = $status;
         }
-        $this->headers = $headers;
+        $this->headers = $headers + array(
+			'X-Content-Security-Policy' => 'allow \'self\'; img-src *'
+		);
     }
 
     /**
