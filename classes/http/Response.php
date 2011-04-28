@@ -121,8 +121,11 @@ class Response extends Message
         if (array_key_exists($status, $this->statuses)) {
             $this->status = $status;
         }
+		// Add default headers to prevent or limit XSS and clickjacking
+		// TODO: Move to config
         $this->headers = $headers + array(
-			'X-Content-Security-Policy' => 'allow \'self\'; img-src *'
+			'X-Content-Security-Policy' => 'allow \'self\'; img-src *',
+			'X-Frame-Options' => 'SAMEORIGIN'
 		);
     }
 

@@ -40,6 +40,11 @@ abstract class Message
 		return $this->headers;
 	}
 	
+	public function getHeader($name)
+	{
+		return isset($this->headers[$name]) ? $this->headers[$name] : null;
+	}
+	
 	/**
 	 * @param type $protocol 
 	 */
